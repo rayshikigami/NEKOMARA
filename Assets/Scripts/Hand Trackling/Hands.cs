@@ -16,7 +16,8 @@ public class Hands : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
+        if (IsStop())
+        { print("AAAAA"); }
     }
 
     //********手勢偵測********
