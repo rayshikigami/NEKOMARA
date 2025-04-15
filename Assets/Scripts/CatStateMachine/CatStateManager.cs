@@ -28,14 +28,14 @@ public class CatIdleState : CatStateBase
     {
         if (Time.time - cat.stateEnterTime > 5f)
         {
-            cat.ChangeState(new CatWalkState(cat));
+            cat.ChangeState(new CatWanderState(cat));
         }
     }
 }
 
-public class CatWalkState : CatStateBase
+public class CatWanderState : CatStateBase
 {
-    public CatWalkState(CatStateManager cat) : base(cat) { }
+    public CatWanderState(CatStateManager cat) : base(cat) { }
 
     public override void Enter()
     {
@@ -115,6 +115,31 @@ public class CatPlayState : CatStateBase
     }
 }
 
+public class CatAttackState : CatStateBase
+{
+    public CatAttackState(CatStateManager cat) : base(cat) { }
+
+    public override void Enter()
+    {
+        cat.animator.Play("Attack");
+    }
+
+    public override void Update()
+    {
+        cat.AttackPlayer();
+    }
+}
+
+public class CatEatState : CatStateBase
+{
+    public CatEatState(CatStateManager cat) : base(cat) { }
+
+    public override void Enter()
+    {
+        cat.animator.Play("Eating");
+        cat.Eating();
+    }
+}
 public class CatStateManager : MonoBehaviour
 {
     private CatStateBase currentState;
@@ -142,7 +167,7 @@ public class CatStateManager : MonoBehaviour
         if (UnityEngine.AI.NavMesh.SamplePosition(transform.position, out UnityEngine.AI.NavMeshHit hit, 1f, UnityEngine.AI.NavMesh.AllAreas))
         {
             Vector3 pos = transform.position;
-            pos.y = hit.position.y; 
+            pos.y = hit.position.y - 0.03f; // Adjust the height to match the ground level
             transform.position = pos;
         }
     }
@@ -172,4 +197,6 @@ public class CatStateManager : MonoBehaviour
     public void FollowUser() { /* Follow user logic */ }
     public void RunAwayFromUser() { /* Flee logic */ }
     public void FollowToyPointer() { /* Follow laser/target logic */ }
+    public void AttackPlayer() { /* Follow laser/target logic */ }
+    public void Eating() { /* Follow laser/target logic */ }
 }
