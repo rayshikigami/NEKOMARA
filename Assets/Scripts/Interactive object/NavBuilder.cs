@@ -19,7 +19,7 @@ public class NavBuilder : MonoBehaviour
 
     IEnumerator DelayedInit()
     {
-        yield return new WaitForSeconds(1.0f); // 等 SDK 生成 Mesh
+        yield return new WaitForSeconds(5.0f); // 等 SDK 生成 Mesh
         surface.BuildNavMesh();
         yield return new WaitForSeconds(0.1f); // 等建完
         AutoLinkAnchors();
