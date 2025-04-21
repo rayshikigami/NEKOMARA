@@ -318,7 +318,7 @@ public class CatStateManager : MonoBehaviour
         if (UnityEngine.AI.NavMesh.SamplePosition(transform.position, out UnityEngine.AI.NavMeshHit hit, 1f, UnityEngine.AI.NavMesh.AllAreas))
         {
             Vector3 pos = transform.position;
-            pos.y = hit.position.y; // Adjust the height to match the ground level
+            pos.y = hit.position.y ; // Adjust the height to match the ground level
             transform.position = pos;
         }
     }
@@ -334,8 +334,8 @@ public class CatStateManager : MonoBehaviour
 
     public void MoveToRandomPoint() { 
         Vector3 randomDirection = Random.insideUnitSphere * 5f;
-        randomDirection = transform.position;
-        randomDirection.z += 4f; 
+        randomDirection += transform.position;
+        // randomDirection.z += 3f;
         if (UnityEngine.AI.NavMesh.SamplePosition(randomDirection, out UnityEngine.AI.NavMeshHit hit, 5f, UnityEngine.AI.NavMesh.AllAreas))
         {
             Debug.Log("Moving to random point: " + hit.position);

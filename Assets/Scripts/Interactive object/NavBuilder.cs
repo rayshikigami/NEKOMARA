@@ -11,6 +11,7 @@ public class NavBuilder : MonoBehaviour
     public float maxJumpHeight = 2.0f;
     public float maxJumpDistance = 5.0f;
 
+    public GameObject cat;
     void Start()
     {
         StartCoroutine(DelayedInit());
@@ -22,6 +23,12 @@ public class NavBuilder : MonoBehaviour
         surface.BuildNavMesh();
         yield return new WaitForSeconds(0.1f); // 等建完
         AutoLinkAnchors();
+        yield return new WaitForSeconds(1.0f); // 等建完
+        if (cat != null)
+        {
+            cat.SetActive(true);
+            cat.transform.position = new Vector3(0, 0.5f, 0); 
+        }
     }
 
     void AutoLinkAnchors()
