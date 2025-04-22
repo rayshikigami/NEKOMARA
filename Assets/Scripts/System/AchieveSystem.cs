@@ -88,6 +88,7 @@ public class AchieveSystem : MonoBehaviour
     public void LoadAchieve(string fileName)
     {
         string path = Path.Combine(Application.persistentDataPath, fileName);
+        print(path);
         if (!File.Exists(path))
         {
             Debug.LogError($"找不到檔案：{path}");
@@ -112,13 +113,13 @@ public class AchieveSystem : MonoBehaviour
 
                 AchieveDone.Add(int.Parse(parts[2]));//0未達成 1達成
                 AchieveDiscribe.Add(parts[1]);
-                progressData[parts[0]] = AchieveDone.Count - 1;//index
+                AchieveID[parts[0]] = AchieveDone.Count - 1;//index
 
 
             }
         }
 
-        Debug.Log($"成功載入進度資料，共 {progressData.Count} 筆");
+        Debug.Log($"成功載入進度資料，共 {AchieveID.Count} 筆");
     }
 
     //******************************************************
