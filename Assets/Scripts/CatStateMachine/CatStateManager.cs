@@ -1,5 +1,7 @@
 using UnityEngine;
 
+
+
 public abstract class CatStateBase
 {
     protected CatStateManager cat;
@@ -14,8 +16,7 @@ public abstract class CatStateBase
     public virtual void Exit() { }
 }
 
-
-public class CatIdleState : CatStateBase // complete 
+public class CatIdleState : CatStateBase // 閒置狀態 
 {
     public CatIdleState(CatStateManager cat) : base(cat) { }
     private float idleDuration = 0f; 
@@ -34,23 +35,8 @@ public class CatIdleState : CatStateBase // complete
         if (Time.time - cat.stateEnterTime > idleDuration)
         {
             // 隨機到 CatWanderState, CatSleepState, CatRollState, CatGroomingState, CatMoveToPointState, 用 array 來表示個個機率
-            float totalProbability = 0f;
-            foreach (float probability in stateProbabilities)
-            {
-                totalProbability += probability;
-            }
-            float randomValue = Random.Range(0f, totalProbability);
-            float cumulativeProbability = 0f;
-            int randomState = 0;
-            for (int i = 0; i < stateProbabilities.Length; i++)
-            {
-                cumulativeProbability += stateProbabilities[i];
-                if (randomValue <= cumulativeProbability)
-                {
-                    randomState = i;
-                    break;
-                }
-            }
+            // 0: CatWanderState, 1: CatSleepState, 2: CatRollState, 3: CatGroomingState, 4: CatMoveToPointState, 5: CatPlayWithItemState
+            int randomState = cat.getRandomStateNumber(stateProbabilities);
             switch (randomState)
             {
                 case 0:
@@ -81,7 +67,7 @@ public class CatIdleState : CatStateBase // complete
     }
 }
 
-public class CatWanderState : CatStateBase // complete
+public class CatWanderState : CatStateBase // 閒晃狀態
 {
     public CatWanderState(CatStateManager cat) : base(cat) { }
 
@@ -101,7 +87,7 @@ public class CatWanderState : CatStateBase // complete
     }
 }
 
-public class CatSleepState : CatStateBase // complete
+public class CatSleepState : CatStateBase // 睡覺狀態
 {
     // randomly sleep for 10-50 seconds, then change to CatIdleState
     private float sleepDuration = 0f; // Duration of sleep
@@ -110,9 +96,10 @@ public class CatSleepState : CatStateBase // complete
 
     public override void Enter()
     {
-        sleepDuration = Random.Range(1f, 5f); // Random sleep duration between 10 and 50 seconds
+        sleepDuration = Random.Range(10f, 50f); // Random sleep duration between 10 and 50 seconds
         Debug.Log("Cat is now sleeping.");
         cat.animator.Play("Sleep");
+        cat.sleeping = true; // Set the sleeping flag to true
     }
     public override void Update()
     {
@@ -123,7 +110,7 @@ public class CatSleepState : CatStateBase // complete
     }
 }
 
-public class CatRollState : CatStateBase // complete
+public class CatRollState : CatStateBase // 打滾狀態
 {
     // randomly roll for 2~5 seconds, then change to CatIdleState
     public CatRollState(CatStateManager cat) : base(cat) { }
@@ -144,7 +131,7 @@ public class CatRollState : CatStateBase // complete
     }
 }
 
-public class CatGroomingState : CatStateBase // complete
+public class CatGroomingState : CatStateBase // 理毛狀態
 {
     public CatGroomingState(CatStateManager cat) : base(cat) { }
     // randomly groom for 2~5 seconds, then change to CatIdleState
@@ -166,7 +153,7 @@ public class CatGroomingState : CatStateBase // complete
     }
 }
 
-public class CatMoveToObjectState : CatStateBase // complete
+public class CatMoveToObjectState : CatStateBase // 移動到物件狀態
 {
     private GameObject target;
     private CatStateBase nextState; // The next state to transition to after reaching the target
@@ -192,7 +179,7 @@ public class CatMoveToObjectState : CatStateBase // complete
     }
 }
 
-public class CatEatState : CatStateBase // complete
+public class CatEatState : CatStateBase // 吃東西狀態
 {
     // randomly eat for 2~5 seconds, then change to CatIdleState
     private float eatDuration = 0f; // Duration of eating
@@ -216,7 +203,7 @@ public class CatEatState : CatStateBase // complete
     }
 }
 
-public class CatDrinkState : CatStateBase // complete
+public class CatDrinkState : CatStateBase // 喝水狀態
 {
     // randomly eat for 2~5 seconds, then change to CatIdleState
     private float drinkDuration = 0f; // Duration of eating
@@ -239,7 +226,8 @@ public class CatDrinkState : CatStateBase // complete
         }
     }
 }
-public class CatPlayWithItemState : CatStateBase // complete
+
+public class CatPlayWithItemState : CatStateBase // 玩玩具狀態
 {
     // randomly play with item for 2~5 seconds, then change to CatIdleState
     private float playDuration = 0f; // Duration of playing with item
@@ -262,7 +250,7 @@ public class CatPlayWithItemState : CatStateBase // complete
     }
 }
 
-public class CatFollowState : CatStateBase
+public class CatFollowState : CatStateBase // 跟隨狀態
 {
     public CatFollowState(CatStateManager cat) : base(cat) { }
 
@@ -278,31 +266,151 @@ public class CatFollowState : CatStateBase
     }
 }
 
-public class CatAttackState : CatStateBase
+public class CatAttackState : CatStateBase // 攻擊狀態
 {
     public CatAttackState(CatStateManager cat) : base(cat) { }
 
     public override void Enter()
     {
         cat.animator.Play("Attack");
+        cat.AttackUser();
+    }
+
+    public override void Update()
+    {
+        // Attack logic here, if needed
+        // For now, just wait for the attack animation to finish
+        if (cat.animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1.0f)
+        {
+            cat.ChangeState(new CatIdleState(cat)); // Transition to idle state after attack
+        }
     }
 }
 
+public class CatPlayWithCatTeaserState : CatStateBase // 玩逗貓棒狀態
+{
+    public CatPlayWithCatTeaserState(CatStateManager cat) : base(cat) { }
+
+    public override void Enter()
+    {
+        cat.animator.Play("PlayWithCatTeaser");
+    }
+}
+
+public class CatPetState : CatStateBase // 撫摸狀態
+{
+    public CatPetState(CatStateManager cat) : base(cat) { }
+
+    public override void Enter()
+    {
+        cat.animator.Play("Petted");
+    }
+}
+
+public class CatFleeState : CatStateBase // 逃跑狀態
+{
+    public CatFleeState(CatStateManager cat) : base(cat) { }
+
+    public override void Enter()
+    {
+        cat.animator.Play("RunAway");
+    }
+}
+
+public class CatAskForFoodState : CatStateBase // 要食物狀態
+{
+    public CatAskForFoodState(CatStateManager cat) : base(cat) { }
+
+    public override void Enter()
+    {
+        cat.animator.Play("AskForFood");
+    }
+}
+
+public class CatPlayDeadState : CatStateBase // 裝死狀態
+{
+    public CatPlayDeadState(CatStateManager cat) : base(cat) { }
+
+    public override void Enter()
+    {
+        cat.animator.Play("PlayDead");
+    }
+}
+
+public class CatBackflipState : CatStateBase // 後空翻狀態
+{
+    public CatBackflipState(CatStateManager cat) : base(cat) { }
+
+    public override void Enter()
+    {
+        cat.animator.Play("Backflip");
+    }
+}
+
+public class CatSitDownState : CatStateBase // 坐下狀態
+{
+    public CatSitDownState(CatStateManager cat) : base(cat) { }
+
+    public override void Enter()
+    {
+        cat.sitting = true;
+        cat.animator.Play("SitDown");
+    }
+}
+
+public class CatStandUpState : CatStateBase // 起立狀態
+{
+    public CatStandUpState(CatStateManager cat) : base(cat) { }
+
+    public override void Enter()
+    {
+        cat.animator.Play("StandUp");
+    }
+
+    public override void Update()
+    {
+        // Check if the cat is already sitting
+        if (cat.animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1.0f)
+        {
+            cat.sitting = false; // Set the sitting flag to true
+            cat.ChangeState(new CatFollowState(cat)); // Transition to idle state after attack
+        }
+    }
+
+}
+
+public class CatPlayWithOtherCatState : CatStateBase // 玩其他貓狀態
+{
+    public CatPlayWithOtherCatState(CatStateManager cat) : base(cat) { }
+
+    public override void Enter()
+    {
+        cat.animator.Play("PlayWithOtherCat");
+    }
+}
+
+// cat Manager
 
 public class CatStateManager : MonoBehaviour
 {
     private CatStateBase currentState;
-    public Animator animator;
+    public bool sitting = false; // Flag to check if the cat is sitting
+    public bool sleeping = false; // Flag to check if the cat is sleeping
+    public Animator animator; // Reference to the Animator component
+    public AudioSource audioSource; // Reference to the AudioSource component
+    public AudioClip[] meowClips; // Array of meow sound clips
     public UnityEngine.AI.NavMeshAgent agent; // Reference to the NavMeshAgent for movement
     public GameObject catSkeleton; // Reference to the cat skeleton prefab
     public GameObject user; // Reference to the user object
+    public GameObject othercat; // Reference to the user object
     public float stateEnterTime;
     void Start()
     {   
         if (UnityEngine.AI.NavMesh.SamplePosition(transform.position, out UnityEngine.AI.NavMeshHit hit, 2f, UnityEngine.AI.NavMesh.AllAreas))
         {
             agent.Warp(hit.position); 
-
+            // change agent speed to 0.5f
+            agent.speed = 0.5f;
         }
         
         ChangeState(new CatIdleState(this));
@@ -335,7 +443,7 @@ public class CatStateManager : MonoBehaviour
     public void MoveToRandomPoint() { 
         Vector3 randomDirection = Random.insideUnitSphere * 5f;
         randomDirection += transform.position;
-        // randomDirection.z += 3f;
+        randomDirection.y += 2f;
         if (UnityEngine.AI.NavMesh.SamplePosition(randomDirection, out UnityEngine.AI.NavMeshHit hit, 5f, UnityEngine.AI.NavMesh.AllAreas))
         {
             Debug.Log("Moving to random point: " + hit.position);
@@ -346,27 +454,55 @@ public class CatStateManager : MonoBehaviour
     {
         return !agent.pathPending && agent.remainingDistance <= agent.stoppingDistance;
     }
-    public void LookAtUser() { /* LookAt logic */ }
+    public void LookAtUser() {
+
+    }
     public void FollowUser() { 
         if (user != null)
         {
             Vector3 direction = (user.transform.position - transform.position).normalized;
-            Vector3 targetPosition = user.transform.position - direction * 1.0f;
+            Vector3 targetPosition = user.transform.position - direction * 0.5f;
             if (UnityEngine.AI.NavMesh.SamplePosition(targetPosition, out UnityEngine.AI.NavMeshHit hit, 1f, UnityEngine.AI.NavMesh.AllAreas))
             {
                 agent.SetDestination(hit.position);
             }
         }
      }
-    public void RunAwayFromUser() { /* Flee logic */ }
-    public void FollowToyPointer() { /* Follow laser/target logic */ }
+    public void RunAwayFromUser() { 
+        if (user != null)
+        {
+            Vector3 direction = (transform.position - user.transform.position).normalized;
+            // random length between 1 and 3
+            float randomLength = Random.Range(1f, 3f);
+            Vector3 targetPosition = transform.position + direction * randomLength;
+            if (UnityEngine.AI.NavMesh.SamplePosition(targetPosition, out UnityEngine.AI.NavMeshHit hit, 1f, UnityEngine.AI.NavMesh.AllAreas))
+            {
+                agent.SetDestination(hit.position);
+            }
+        }
+    }
+     
+    public void FollowToyPointer() { 
+        // Follow the toy pointer logic here
+        // For example, you can set the destination to the toy pointer's position
+        GameObject toyPointer = GameObject.FindGameObjectWithTag("ToyPointer");
+        if (toyPointer != null)
+        {
+            Vector3 targetPosition = toyPointer.transform.position;
+            if (UnityEngine.AI.NavMesh.SamplePosition(targetPosition, out UnityEngine.AI.NavMeshHit hit, 1f, UnityEngine.AI.NavMesh.AllAreas))
+            {
+                agent.SetDestination(hit.position);
+            }
+        }
+    }
     public void AttackUser() { /* Follow laser/target logic */ }
     public GameObject FindFood() { 
         // find the food position in the scene, and return the position
         GameObject[] foods = GameObject.FindGameObjectsWithTag("Food");
-        if (foods.Length > 0)
+        int length = foods.Length;
+        if (length > 0)
         {
-            return foods[0];
+            return foods[Random.Range(0, length)];
         }
         return null;
     }
@@ -374,9 +510,10 @@ public class CatStateManager : MonoBehaviour
     public GameObject FindBox() { 
         // find the box position in the scene, and return the position
         GameObject[] boxes = GameObject.FindGameObjectsWithTag("Box");
-        if (boxes.Length > 0)
+        int length = boxes.Length;
+        if (length > 0)
         {
-            return boxes[0];
+            return boxes[Random.Range(0, length)];
         }
         return null;
     }
@@ -390,5 +527,26 @@ public class CatStateManager : MonoBehaviour
                 agent.SetDestination(hit.position);
             }
         }
+    }
+
+    public int getRandomStateNumber( float[] stateProbabilities){
+        float totalProbability = 0f;
+        foreach (float probability in stateProbabilities)
+        {
+            totalProbability += probability;
+        }
+        float randomValue = Random.Range(0f, totalProbability);
+        float cumulativeProbability = 0f;
+        int randomState = 0;
+        for (int i = 0; i < stateProbabilities.Length; i++)
+        {
+            cumulativeProbability += stateProbabilities[i];
+            if (randomValue <= cumulativeProbability)
+            {
+                randomState = i;
+                break;
+            }
+        }
+        return randomState;
     }
 }
