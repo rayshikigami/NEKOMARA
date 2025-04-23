@@ -351,8 +351,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\u53EC\u559A\u8C93\u54AA"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 61440324841b13440b6ef0aad84d5ad2, type: 2}
+  m_sharedMaterial: {fileID: -4382008749248284176, guid: 61440324841b13440b6ef0aad84d5ad2, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
