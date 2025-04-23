@@ -1,7 +1,5 @@
 using UnityEngine;
 
-
-
 public abstract class CatStateBase
 {
     protected CatStateManager cat;
@@ -42,7 +40,7 @@ public class CatIdleState : CatStateBase // 閒置狀態
     public CatIdleState(CatStateManager cat) : base(cat) { }
     private float idleDuration = 0f; 
 
-    private float[] stateProbabilities = {5,0,0,0,0,0}; // 機率 array
+    private float[] stateProbabilities = {5,0,0,0,0}; // 機率 array
 
     public override void Enter()
     {
@@ -83,10 +81,6 @@ public class CatIdleState : CatStateBase // 閒置狀態
                     cat.ChangeState(new CatGroomingState(cat));
                     break;
                 case 4:
-                    GameObject food = cat.FindFood();
-                    cat.ChangeState(new CatMoveToObjectState(cat, food , new CatEatState(cat, food)));
-                    break;
-                case 5:
                     cat.ChangeState(new CatMoveToObjectState(cat,  cat.FindBox(), new CatPlayWithItemState(cat)));
                     break;
                 default:
@@ -335,18 +329,31 @@ public class CatPlayWithCatTeaserState : CatStateBase // 玩逗貓棒狀態
     public CatPlayWithCatTeaserState(CatStateManager cat) : base(cat) { }
 
     public override void Enter()
+    {}
+
+    public override void Update()
     {
-        cat.animator.Play("PlayWithCatTeaser");
+        cat.FollowToyPointer(); // Follow the toy pointer logic here
     }
 }
 
-public class CatPetState : CatStateBase // 撫摸狀態
+public class CatPetState : CatStateBase // 撫摸狀態 -> completed
 {
     public CatPetState(CatStateManager cat) : base(cat) { }
 
     public override void Enter()
     {
         cat.animator.Play("Petted");
+    }
+
+    public override void Update()
+    {
+        // Petting logic here, if needed
+        // For now, just wait for the duration to end
+        if (cat.animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1.0f)
+        {
+            cat.ChangeState(new CatFollowState(cat)); // Transition to idle state after petting
+        }
     }
 }
 
@@ -431,7 +438,7 @@ public class CatBackflipState : CatStateBase // 後空翻狀態 -> completed
     }
 }
 
-public class CatSitDownState : CatStateBase // 坐下狀態
+public class CatSitDownState : CatStateBase // 坐下狀態 -> completed
 {
     public CatSitDownState(CatStateManager cat) : base(cat) { }
 
@@ -451,7 +458,7 @@ public class CatSitDownState : CatStateBase // 坐下狀態
     }
 }
 
-public class CatStandUpState : CatStateBase // 起立狀態
+public class CatStandUpState : CatStateBase // 起立狀態 -> completed
 {
     public CatStandUpState(CatStateManager cat) : base(cat) { }
 

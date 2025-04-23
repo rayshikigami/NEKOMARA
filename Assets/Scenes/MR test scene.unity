@@ -19282,6 +19282,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6cce9fbaff4a1c64bbbf7135e7621c8a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  catName: 
   sitting: 0
   sleeping: 0
   isFollowing: 0
@@ -19293,6 +19294,7 @@ MonoBehaviour:
   user: {fileID: 0}
   othercat: {fileID: 0}
   favorSystem: {fileID: 2048762373}
+  hungerSystem: {fileID: 296567051}
   stateEnterTime: 0
 --- !u!23 &1646676020
 MeshRenderer:
