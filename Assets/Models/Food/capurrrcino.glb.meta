@@ -2,12 +2,7 @@ fileFormatVersion: 2
 guid: 229255483e55baa489a47c57eed664de
 ScriptedImporter:
   internalIDToNameTable: []
-  externalObjects:
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: cat_food
-    second: {fileID: 9035273512705112483, guid: 229255483e55baa489a47c57eed664de, type: 3}
+  externalObjects: {}
   serializedVersion: 2
   userData: 
   assetBundleName: 
