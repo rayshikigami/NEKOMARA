@@ -13,6 +13,27 @@ public abstract class CatStateBase
 
     public virtual void Enter() { }
     public virtual void Update() { }
+    public virtual void OnUpdate() { 
+        if(!cat.isFollowing ) // 如果貓咪沒有跟隨玩家，並且玩家在視野內，並且貓咪沒有睡覺，並且貓咪沒有坐下
+        {
+            if(!cat.sleeping && !cat.sitting && cat.IsUserVisible()) // 如果貓咪沒有睡覺，並且貓咪沒有坐下
+            {
+                if(cat.wantFollow()){
+                    cat.ChangeState(new CatFollowState(cat)); // 轉換到跟隨狀態
+                    cat.isFollowing = true; // Set the following flag to true
+                }else if(cat.wantFlee()){
+                    cat.ChangeState(new CatFleeState(cat)); // 轉換到逃跑狀態
+                }else{
+                    this.Update();
+                }
+                
+            }else{
+                this.Update();
+            }
+        }else{
+            this.Update();
+        }
+    }
     public virtual void Exit() { }
 }
 
@@ -31,7 +52,17 @@ public class CatIdleState : CatStateBase // 閒置狀態
     }
 
     public override void Update()
-    {
+    {   
+        if(cat.hungerSystem.GetHunger(cat.catName) < 30){
+            GameObject food = cat.FindFood();
+            if (food != null)
+            {
+                cat.ChangeState(new CatMoveToObjectState(cat, food, new CatEatState(cat, food)));
+                return;
+            }else{
+                // 如果找不到食物，就要求食物地方
+            }
+        }
         if (Time.time - cat.stateEnterTime > idleDuration)
         {
             // 隨機到 CatWanderState, CatSleepState, CatRollState, CatGroomingState, CatMoveToPointState, 用 array 來表示個個機率
@@ -52,7 +83,8 @@ public class CatIdleState : CatStateBase // 閒置狀態
                     cat.ChangeState(new CatGroomingState(cat));
                     break;
                 case 4:
-                    cat.ChangeState(new CatMoveToObjectState(cat,  cat.FindFood(), new CatEatState(cat)));
+                    GameObject food = cat.FindFood();
+                    cat.ChangeState(new CatMoveToObjectState(cat, food , new CatEatState(cat, food)));
                     break;
                 case 5:
                     cat.ChangeState(new CatMoveToObjectState(cat,  cat.FindBox(), new CatPlayWithItemState(cat)));
@@ -67,7 +99,7 @@ public class CatIdleState : CatStateBase // 閒置狀態
     }
 }
 
-public class CatWanderState : CatStateBase // 閒晃狀態
+public class CatWanderState : CatStateBase // 閒晃狀態 -> completed
 {
     public CatWanderState(CatStateManager cat) : base(cat) { }
 
@@ -87,7 +119,7 @@ public class CatWanderState : CatStateBase // 閒晃狀態
     }
 }
 
-public class CatSleepState : CatStateBase // 睡覺狀態
+public class CatSleepState : CatStateBase // 睡覺狀態 -> completed? 缺少叫醒的條件
 {
     // randomly sleep for 10-50 seconds, then change to CatIdleState
     private float sleepDuration = 0f; // Duration of sleep
@@ -105,12 +137,13 @@ public class CatSleepState : CatStateBase // 睡覺狀態
     {
         if (Time.time - cat.stateEnterTime > sleepDuration)
         {
+            cat.sleeping = false;
             cat.ChangeState(new CatIdleState(cat));
         }
     }
 }
 
-public class CatRollState : CatStateBase // 打滾狀態
+public class CatRollState : CatStateBase // 打滾狀態 -> completed
 {
     // randomly roll for 2~5 seconds, then change to CatIdleState
     public CatRollState(CatStateManager cat) : base(cat) { }
@@ -131,7 +164,7 @@ public class CatRollState : CatStateBase // 打滾狀態
     }
 }
 
-public class CatGroomingState : CatStateBase // 理毛狀態
+public class CatGroomingState : CatStateBase // 理毛狀態 -> completed
 {
     public CatGroomingState(CatStateManager cat) : base(cat) { }
     // randomly groom for 2~5 seconds, then change to CatIdleState
@@ -179,31 +212,38 @@ public class CatMoveToObjectState : CatStateBase // 移動到物件狀態
     }
 }
 
-public class CatEatState : CatStateBase // 吃東西狀態
+public class CatEatState : CatStateBase // 吃東西狀態 -> completed
 {
-    // randomly eat for 2~5 seconds, then change to CatIdleState
-    private float eatDuration = 0f; // Duration of eating
-    public CatEatState(CatStateManager cat) : base(cat) { }
+    private GameObject food; // The food object to eat
+    public CatEatState(CatStateManager cat, GameObject food) : base(cat)
+    {
+        this.food = food;
+    }
 
     public override void Enter()
     {
-        eatDuration = Random.Range(2f, 5f); // Random eat duration between 2 and 5 seconds
-        Debug.Log("Cat is now eating.");
-        cat.animator.Play("Eat");
+        Debug.Log("Cat is now wanna eating.");
+        if(food){
+            cat.animator.Play("Eat");
+            cat.hungerSystem.AddHunger(cat.catName,50); // Add hunger points when eating
+        }else{
+            cat.ChangeState(new CatAskForFoodState(cat,food));
+        }
     }
 
     public override void Update()
     {
         // Eating logic here, if needed
         // For now, just wait for the duration to end
-        if (Time.time - cat.stateEnterTime > eatDuration)
+        // if animation is finished, change to CatIdleState
+        if (cat.animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1.0f )
         {
-            cat.ChangeState(new CatIdleState(cat)); // Transition to idle state after eating
+            cat.ChangeState(new CatIdleState(cat)); 
         }
     }
 }
 
-public class CatDrinkState : CatStateBase // 喝水狀態
+public class CatDrinkState : CatStateBase // 喝水狀態 -> 之後整合至eating狀態
 {
     // randomly eat for 2~5 seconds, then change to CatIdleState
     private float drinkDuration = 0f; // Duration of eating
@@ -250,7 +290,7 @@ public class CatPlayWithItemState : CatStateBase // 玩玩具狀態
     }
 }
 
-public class CatFollowState : CatStateBase // 跟隨狀態
+public class CatFollowState : CatStateBase // 跟隨狀態 -> 等手勢偵測
 {
     public CatFollowState(CatStateManager cat) : base(cat) { }
 
@@ -261,14 +301,17 @@ public class CatFollowState : CatStateBase // 跟隨狀態
 
     public override void Update()
     {
-        cat.FollowUser();
+        if(!cat.sitting){
+            cat.FollowUser();
+        }
         cat.LookAtUser();
+
     }
 }
 
-public class CatAttackState : CatStateBase // 攻擊狀態
+public class CatAttackUserState : CatStateBase // 攻擊玩家狀態 -> completed
 {
-    public CatAttackState(CatStateManager cat) : base(cat) { }
+    public CatAttackUserState(CatStateManager cat) : base(cat) { }
 
     public override void Enter()
     {
@@ -307,27 +350,46 @@ public class CatPetState : CatStateBase // 撫摸狀態
     }
 }
 
-public class CatFleeState : CatStateBase // 逃跑狀態
+public class CatFleeState : CatStateBase // 逃跑狀態 -> completed
 {
     public CatFleeState(CatStateManager cat) : base(cat) { }
 
     public override void Enter()
     {
-        cat.animator.Play("RunAway");
+        cat.RunAwayFromUser();
+        cat.animator.Play("Run");
     }
 }
 
-public class CatAskForFoodState : CatStateBase // 要食物狀態
-{
-    public CatAskForFoodState(CatStateManager cat) : base(cat) { }
+public class CatAskForFoodState : CatStateBase // 要食物狀態 -> completed
+{   
+    private GameObject food; // The food object to eat
+    public CatAskForFoodState(CatStateManager cat, GameObject food) : base(cat) {
+        this.food = food;
+    }
 
     public override void Enter()
     {
         cat.animator.Play("AskForFood");
     }
+
+    public override void Update()
+    {
+        // Ask for food logic here, if needed
+        // For now, just wait for the duration to end
+        // if animation is finished, change to CatIdleState
+        if (cat.animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1.0f)
+        {
+            if (food){
+                cat.ChangeState(new CatEatState(cat,food)); // Transition to idle state after asking for food
+            }else{
+                cat.ChangeState(new CatAskForFoodState(cat,food)); // Transition to idle state after asking for food
+            }
+        }
+    }
 }
 
-public class CatPlayDeadState : CatStateBase // 裝死狀態
+public class CatPlayDeadState : CatStateBase // 裝死狀態 -> completed
 {
     public CatPlayDeadState(CatStateManager cat) : base(cat) { }
 
@@ -335,15 +397,37 @@ public class CatPlayDeadState : CatStateBase // 裝死狀態
     {
         cat.animator.Play("PlayDead");
     }
+
+    public override void Update()
+    {
+        // Play dead logic here, if needed
+        // For now, just wait for the duration to end
+        // if animation is finished, change to CatIdleState
+        if (cat.animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1.0f)
+        {
+            cat.ChangeState(new CatFollowState(cat)); // Transition to idle state after play dead
+        }
+    }
 }
 
-public class CatBackflipState : CatStateBase // 後空翻狀態
+public class CatBackflipState : CatStateBase // 後空翻狀態 -> completed
 {
     public CatBackflipState(CatStateManager cat) : base(cat) { }
 
     public override void Enter()
     {
         cat.animator.Play("Backflip");
+    }
+
+    public override void Update()
+    {
+        // Backflip logic here, if needed
+        // For now, just wait for the duration to end
+        // if animation is finished, change to CatIdleState
+        if (cat.animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1.0f)
+        {
+            cat.ChangeState(new CatFollowState(cat)); // Transition to idle state after backflip
+        }
     }
 }
 
@@ -355,6 +439,15 @@ public class CatSitDownState : CatStateBase // 坐下狀態
     {
         cat.sitting = true;
         cat.animator.Play("SitDown");
+    }
+
+    public override void Update()
+    {
+        // Check if the cat is already sitting
+        if (cat.animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1.0f)
+        {
+            cat.ChangeState(new CatFollowState(cat)); // Transition to idle state after attack
+        }
     }
 }
 
@@ -394,8 +487,10 @@ public class CatPlayWithOtherCatState : CatStateBase // 玩其他貓狀態
 public class CatStateManager : MonoBehaviour
 {
     private CatStateBase currentState;
+    public string catName; // Name of the cat
     public bool sitting = false; // Flag to check if the cat is sitting
     public bool sleeping = false; // Flag to check if the cat is sleeping
+    public bool isFollowing = false; // Flag to check if the cat is following the user
     public Animator animator; // Reference to the Animator component
     public AudioSource audioSource; // Reference to the AudioSource component
     public AudioClip[] meowClips; // Array of meow sound clips
@@ -403,6 +498,8 @@ public class CatStateManager : MonoBehaviour
     public GameObject catSkeleton; // Reference to the cat skeleton prefab
     public GameObject user; // Reference to the user object
     public GameObject othercat; // Reference to the user object
+    public FavorSystem favorSystem;
+    public HungerSystem hungerSystem; // Reference to the hunger system
     public float stateEnterTime;
     void Start()
     {   
@@ -418,7 +515,7 @@ public class CatStateManager : MonoBehaviour
 
     void Update()
     {
-        currentState?.Update();
+        currentState?.OnUpdate();
     }
 
     void LateUpdate()
@@ -453,6 +550,33 @@ public class CatStateManager : MonoBehaviour
     public bool HasReachedDestination()
     {
         return !agent.pathPending && agent.remainingDistance <= agent.stoppingDistance;
+    }
+
+    public bool IsUserVisible()
+    {
+        // Check if the user is visible to the cat
+        Vector3 directionToUser = user.transform.position - transform.position;
+        float angle = Vector3.Angle(transform.forward, directionToUser);
+        if (angle < 45f) // Adjust the angle as needed
+        {
+            RaycastHit hit;
+            if (Physics.Raycast(transform.position, directionToUser.normalized, out hit, 10f)) // Adjust the distance as needed
+            {
+                if (hit.collider.gameObject == user)
+                {
+                    return true; // User is visible
+                }
+            }
+        }
+        return false; // User is not visible
+    }
+    public bool wantFollow() { 
+        
+        return false;
+    }
+    public bool wantFlee() { 
+        
+        return false;
     }
     public void LookAtUser() {
 
