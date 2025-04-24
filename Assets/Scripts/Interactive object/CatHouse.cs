@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using System;
 
 public class CatHouse : MonoBehaviour
 {
@@ -26,7 +27,7 @@ public class CatHouse : MonoBehaviour
     {
         if (OnTheFloor && !isSummon)
         {
-            if (prevPosition == transform.position && prevRotation == transform.rotation)
+            if (prevPosition == transform.position && prevRotation == transform.rotation && Math.Abs(transform.rotation.x) < 3 && Math.Abs(transform.rotation.z) < 3)
             {
                 timer -= Time.fixedDeltaTime;
             }

@@ -12,6 +12,7 @@ public class CatBowl : MonoBehaviour
 
     public bool OnTheFloor = false, isSet = false;
     public bool isFull;
+    public GameObject FoodInTheBowl;
     void Start()
     {
         prevPosition = transform.position;
@@ -68,6 +69,17 @@ public class CatBowl : MonoBehaviour
             print("remove from floor");
             OnTheFloor = false;
             timer = 3; isSet = false;
+            isFull = false;
+            FoodInTheBowl.SetActive(false);
+        }
+    }
+    void OnTriggerEnter(Collider other)
+    {
+        if (isSet && !isFull && other.CompareTag("foodpack"))
+        {
+            isFull = true;
+            //貓食包消失(?)
+            FoodInTheBowl.SetActive(true);
         }
     }
 }
