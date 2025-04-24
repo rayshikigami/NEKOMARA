@@ -508,6 +508,9 @@ public class CatStateManager : MonoBehaviour
     public FavorSystem favorSystem;
     public HungerSystem hungerSystem; // Reference to the hunger system
     public float stateEnterTime;
+    public Transform headBone;
+    public float maxHeadTurnAngle = 60f;
+    public float headTurnSpeed = 5f;
     void Start()
     {   
         if (UnityEngine.AI.NavMesh.SamplePosition(transform.position, out UnityEngine.AI.NavMeshHit hit, 2f, UnityEngine.AI.NavMesh.AllAreas))
@@ -517,6 +520,18 @@ public class CatStateManager : MonoBehaviour
             agent.speed = 0.5f;
         }
         
+        if (headBone == null && catSkeleton != null)
+        {
+            Transform foundHead = catSkeleton.transform.Find("Armature/Hips/Spine/Chest/Upper Chest/Neck/Head"); // 換成你骨架中的實際路徑
+            if (foundHead != null)
+            {
+                headBone = foundHead;
+            }
+            else
+            {
+                Debug.LogWarning("Head bone not found in catSkeleton.");
+            }
+        }
         ChangeState(new CatIdleState(this));
     }
 
@@ -533,6 +548,7 @@ public class CatStateManager : MonoBehaviour
             pos.y = hit.position.y ; // Adjust the height to match the ground level
             transform.position = pos;
         }
+        this.LookAtUser(); // Look at the user in every frame
     }
 
 
@@ -585,9 +601,30 @@ public class CatStateManager : MonoBehaviour
         
         return false;
     }
-    public void LookAtUser() {
+    public void LookAtUser()
+    {
+        if (user == null || headBone == null)
+        {
+            Debug.LogWarning("User or head bone not set. Cannot look at user.");
+            return;
+        }
 
+        // 計算貓頭到使用者的向量
+        Vector3 directionToUser = user.transform.position - headBone.position;
+        Quaternion targetRotation = Quaternion.LookRotation(directionToUser);
+
+        // 限制角度：與貓的整體朝向相比
+        float angle = Quaternion.Angle(transform.rotation, targetRotation);
+        if (angle > maxHeadTurnAngle)
+        {
+            // 對整體方向限制角度，再從貓身體轉到限制後的目標角度
+            targetRotation = Quaternion.RotateTowards(transform.rotation, targetRotation, maxHeadTurnAngle);
+        }
+
+        // 立即設置旋轉
+        headBone.rotation = targetRotation;
     }
+
     public void FollowUser() { 
         if (user != null)
         {
@@ -625,6 +662,8 @@ public class CatStateManager : MonoBehaviour
                 agent.SetDestination(hit.position);
             }
         }
+        
+        
     }
     public void AttackUser() { /* Follow laser/target logic */ }
     public GameObject FindFood() { 
