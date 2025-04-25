@@ -2954,7 +2954,7 @@ SphereCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 1
   m_ProvidesContacts: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_Radius: 0.2
   m_Center: {x: 0, y: 0, z: 0}
@@ -5736,7 +5736,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e2f8f6e9e6f3e114b9bf9a57c2160615, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _pointable: {fileID: 891834854}
+  _pointable: {fileID: 440188620}
   _whenRelease:
     m_PersistentCalls:
       m_Calls:
@@ -18868,7 +18868,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4464368359161826800, guid: d9433d69155e27c4587786cc2ce6b8c1, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -1.39
+      value: -5.46
       objectReference: {fileID: 0}
     - target: {fileID: 4464368359161826800, guid: d9433d69155e27c4587786cc2ce6b8c1, type: 3}
       propertyPath: m_LocalPosition.y
