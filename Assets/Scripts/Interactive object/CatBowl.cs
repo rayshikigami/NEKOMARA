@@ -82,4 +82,10 @@ public class CatBowl : MonoBehaviour
             FoodInTheBowl.SetActive(true);
         }
     }
+
+    public void Eaten()
+    {
+        isFull = false;
+        FoodInTheBowl.SetActive(false);
+    }
 }
