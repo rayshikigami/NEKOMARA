@@ -39,10 +39,14 @@ public class NavBuilder : MonoBehaviour
         yield return new WaitForSeconds(1.0f); // 等建完
         AutoLinkAnchors();
         yield return new WaitForSeconds(1.0f); // 等建完
-        if (cat != null)
+        var allCats = Resources.FindObjectsOfTypeAll<CatStateManager>();
+        foreach (var cat in allCats)
         {
-            cat.SetActive(true);
-            cat.transform.position = new Vector3(0, 0.5f, 0);
+            if (cat.CompareTag("cat"))
+            {
+                cat.gameObject.SetActive(true);
+                cat.transform.position = new Vector3(0, 0.5f, 0);
+            }
         }
         
     }

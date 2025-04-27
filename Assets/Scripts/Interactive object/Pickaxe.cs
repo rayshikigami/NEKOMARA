@@ -9,7 +9,7 @@ public class Pickaxe : MonoBehaviour
 
     void OnCollisionEnter(Collision collision)
     {
-        if(collision.gameObject.CompareTag("SceneObjcet")||collision.gameObject.CompareTag("InteractObject")||collision.gameObject.CompareTag("foodpack"))
+        if(collision.gameObject.CompareTag("SceneObject")||collision.gameObject.CompareTag("InteractObject")||collision.gameObject.CompareTag("foodpack"))
         {
             print("break the object");
             Destroy(collision.gameObject);
