@@ -10,7 +10,7 @@ public class Bell : MonoBehaviour
     private Vector3 lastPosition;
     public float rotationThreshold = 1f; // 角度差異閾值
     private Quaternion lastRotation;
-    public GameObject bellSound;
+    AudioSource bellSound;
     public bool ringing = false;
 
     public float timer = 3;
@@ -18,7 +18,7 @@ public class Bell : MonoBehaviour
     {
         lastPosition = transform.position;
         lastRotation = transform.rotation;
-        ringing = false; bellSound.SetActive(false);
+        ringing = false; bellSound = GetComponent<AudioSource>();
     }
 
     // Update is called once per frame
@@ -37,13 +37,13 @@ public class Bell : MonoBehaviour
             Debug.Log("shake");
             ringing = true;
             timer -= Time.fixedDeltaTime;
-            bellSound.SetActive(true);
+            bellSound.Play();
         }
         else
         {
             ringing = false;
             timer = 3;
-            bellSound.SetActive(false);
+            bellSound.Stop();
         }
 
         if (timer <= 0)

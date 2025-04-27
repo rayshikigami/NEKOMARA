@@ -11,6 +11,8 @@ public class CatTower : MonoBehaviour
     Vector3 prevPosition;
     Quaternion prevRotation;
 
+    public GameObject grabInteractor;
+
     public bool OnTheFloor = false, isSet = false;
     void Start()
     {
@@ -21,7 +23,8 @@ public class CatTower : MonoBehaviour
     }
     void FixedUpdate()
     {
-        if (OnTheFloor && Math.Abs(transform.rotation.x) < 3 && Math.Abs(transform.rotation.z) < 3)
+        print(Math.Abs(transform.rotation.x));
+        if (!isSet && OnTheFloor && Math.Abs(transform.eulerAngles.x) < 3 && Math.Abs(transform.eulerAngles.z) < 3)
         {
             if (prevPosition == transform.position && prevRotation == transform.rotation)
             {
@@ -39,6 +42,10 @@ public class CatTower : MonoBehaviour
             if (timer <= 0)
             {
                 isSet = true;
+                GetComponent<SphereCollider>().enabled = true;
+                grabInteractor.SetActive(false);
+                GetComponent<AudioSource>().Play();
+                FindObjectOfType<NavBuilder>().BuildMap();
                 timer = 3;
             }
         }
@@ -56,7 +63,7 @@ public class CatTower : MonoBehaviour
         }
     }
 
-    void OTriggerExit(Collider other)
+    void OnTriggerExit(Collider other)
     {
         if (isSet && other.CompareTag("cat"))
         {

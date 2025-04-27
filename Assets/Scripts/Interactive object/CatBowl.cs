@@ -13,6 +13,7 @@ public class CatBowl : MonoBehaviour
     public bool OnTheFloor = false, isSet = false;
     public bool isFull;
     public GameObject FoodInTheBowl;
+    public GameObject grabInteractor;
     void Start()
     {
         prevPosition = transform.position;
@@ -29,7 +30,7 @@ public class CatBowl : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (OnTheFloor && Math.Abs(transform.rotation.x) < 3 && Math.Abs(transform.rotation.z) < 3)
+        if (!isSet&&OnTheFloor && Math.Abs(transform.eulerAngles.x) < 3 && Math.Abs(transform.eulerAngles.z) < 3)
         {
             if (prevPosition == transform.position && prevRotation == transform.rotation)
             {
@@ -47,6 +48,8 @@ public class CatBowl : MonoBehaviour
             if (timer <= 0)
             {
                 isSet = true;
+                grabInteractor.SetActive(false);
+                GetComponent<AudioSource>().Play();
                 timer = 3;
             }
         }

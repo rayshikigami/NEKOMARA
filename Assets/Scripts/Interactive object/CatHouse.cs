@@ -13,6 +13,7 @@ public class CatHouse : MonoBehaviour
 
     bool OnTheFloor = false;
     public bool isSummon = false;
+    public GameObject grabInteractor;
     // Start is called before the first frame update
     void Start()
     {
@@ -27,7 +28,7 @@ public class CatHouse : MonoBehaviour
     {
         if (OnTheFloor && !isSummon)
         {
-            if (prevPosition == transform.position && prevRotation == transform.rotation && Math.Abs(transform.rotation.x) < 3 && Math.Abs(transform.rotation.z) < 3)
+            if (prevPosition == transform.position && prevRotation == transform.rotation && Math.Abs(transform.eulerAngles.x) < 3 && Math.Abs(transform.eulerAngles.z) < 3)
             {
                 timer -= Time.fixedDeltaTime;
             }
@@ -43,6 +44,8 @@ public class CatHouse : MonoBehaviour
             {
                 isSummon = true;
                 timer = 3;
+                grabInteractor.SetActive(false);
+                GetComponent<AudioSource>().Play();
                 summon(0);//要召喚的貓的id
             }
         }

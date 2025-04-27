@@ -8,6 +8,8 @@ TagManager:
   - Food
   - cat
   - foodpack
+  - SceneObject
+  - InteractObject
   layers:
   - Default
   - TransparentFX
