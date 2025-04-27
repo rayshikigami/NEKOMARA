@@ -47,7 +47,7 @@ public class CatIdleState : CatStateBase // 閒置狀態
     public CatIdleState(CatStateManager cat) : base(cat) { }
     private float idleDuration = 0f; 
 
-    private float[] stateProbabilities = { 5 * cat.personalty, 0, 0, 0, 0}; // 機率 array
+    private float[] stateProbabilities = { 5, 0, 0, 0, 0}; // 機率 array
 
     public override void Enter()
     {
@@ -578,14 +578,14 @@ public class CatStateManager : MonoBehaviour
     public float headTurnSpeed = 5f;
     public int favorateFood = 0; 
     // personalty with random number 0~1f
-    public float personalty =  Random.Range(0f, 1f);;
+    public float personalty;
     void Start()
     {   
         transform.position = user.transform.position ; // Set the initial position of the cat to the user's position
-
+        personalty = Random.Range(0f, 1f); // Set the personalty to a random number between 0 and 1
         if (UnityEngine.AI.NavMesh.SamplePosition(transform.position, out UnityEngine.AI.NavMeshHit hit, 2f, UnityEngine.AI.NavMesh.AllAreas))
         {
-            agent.Warp(hit.position); 
+            agent.Warp(hit.position);  
             // change agent speed to 0.5f
             agent.speed = 0.5f;
         }
