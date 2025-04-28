@@ -45,6 +45,8 @@ public class CatHouse : MonoBehaviour
                 isSummon = true;
                 timer = 3;
                 grabInteractor.SetActive(false);
+                FindObjectOfType<AchieveSystem>().UpdateProgress("set_object", 1);
+                FindObjectOfType<AchieveSystem>().UpdateProgress("summon", 1);
                 GetComponent<AudioSource>().Play();
                 summon(0);//要召喚的貓的id
             }

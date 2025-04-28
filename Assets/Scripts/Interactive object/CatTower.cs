@@ -46,6 +46,7 @@ public class CatTower : MonoBehaviour
                 grabInteractor.SetActive(false);
                 GetComponent<AudioSource>().Play();
                 FindObjectOfType<NavBuilder>().BuildMap();
+                FindObjectOfType<AchieveSystem>().UpdateProgress("set_object", 1);
                 timer = 3;
             }
         }

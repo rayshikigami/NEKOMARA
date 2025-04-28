@@ -30,7 +30,7 @@ public class CatBowl : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (!isSet&&OnTheFloor && Math.Abs(transform.eulerAngles.x) < 3 && Math.Abs(transform.eulerAngles.z) < 3)
+        if (!isSet && OnTheFloor && Math.Abs(transform.eulerAngles.x) < 3 && Math.Abs(transform.eulerAngles.z) < 3)
         {
             if (prevPosition == transform.position && prevRotation == transform.rotation)
             {
@@ -49,6 +49,7 @@ public class CatBowl : MonoBehaviour
             {
                 isSet = true;
                 grabInteractor.SetActive(false);
+                FindObjectOfType<AchieveSystem>().UpdateProgress("set_object", 1);
                 GetComponent<AudioSource>().Play();
                 timer = 3;
             }
