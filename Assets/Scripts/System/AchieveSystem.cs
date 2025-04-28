@@ -55,6 +55,7 @@ public class AchieveSystem : MonoBehaviour
     public void LoadProgress(string fileName)
     {
         string path = Path.Combine(Application.persistentDataPath, fileName);
+        Debug.LogWarning(path);
         if (!File.Exists(path))
         {
             Debug.LogError($"找不到檔案：{path}");
