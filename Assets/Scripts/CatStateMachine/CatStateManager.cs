@@ -222,13 +222,13 @@ public class CatEatState : CatStateBase // 吃東西狀態 -> completed
 {
     // randomly eat for 2~5 seconds, then change to CatIdleState
     // 這裡的食物是指貓咪要吃的食物，可能是食物的 prefab 或者是食物的 GameObject
-    private float eatDuration = 0f; // Duration of eating
+    private float eatDuration = 10f; // Duration of eating
     private GameObject food; // The food object to eat
     private CatBowl catBowlScript;
 
     public CatEatState(CatStateManager cat, GameObject food) : base(cat)
     {
-        this.eatDuration = Random.Range(2f, 5f); // Random eat duration between 2 and 5 seconds
+        // this.eatDuration = Random.Range(f, 5f); // Random eat duration between 2 and 5 seconds
         this.food = food;
         if (food != null){
             catBowlScript = food.GetComponent<CatBowl>();
@@ -245,11 +245,10 @@ public class CatEatState : CatStateBase // 吃東西狀態 -> completed
         Debug.Log("Cat is now wanna eating.");
         if(catBowlScript.isFull ){
             Debug.Log("Cat is now eating.");
-            cat.animator.CrossFade("eat", 0.25f);
+            cat.animator.CrossFade("eating", 0.25f);
             cat.hungerSystem.AddHunger(cat.catName,50); // Add hunger points when eating
             cat.favorSystem.AddFavor(cat.catName, 10); // Decrease favor points when fleeing
             cat.achieveSystem.UpdateProgress("favor_up", 10);
-            catBowlScript.isFull = false; // Set the food bowl to not full after eating
         }else{
             cat.ChangeState(new CatAskForFoodState(cat,food));
         }
@@ -259,13 +258,19 @@ public class CatEatState : CatStateBase // 吃東西狀態 -> completed
     {
         // Eating logic here, if needed
         // For now, just wait for the duration to end
-        if (food != null && catBowlScript.isFull ){
-            if (Time.time - cat.stateEnterTime > eatDuration)
-            {
-                cat.ChangeState(new CatIdleState(cat)); // Transition to idle state after eating
-            }
-        }else{
-            cat.ChangeState(new CatAskForFoodState(cat,food)); // Transition to idle state after eating
+        if (Time.time - cat.stateEnterTime > eatDuration)
+        {
+            cat.ChangeState(new CatIdleState(cat)); // Transition to idle state after eating
+            
+            catBowlScript.isFull = false; // Set the food bowl to not full after eating
+            return;
+        }
+        AnimatorStateInfo stateInfo = cat.animator.GetCurrentAnimatorStateInfo(0);
+    
+        if ( stateInfo.normalizedTime >= 1.0f)
+        {
+            Debug.Log(stateInfo.normalizedTime);
+            cat.animator.Play("eating",  0, 0.25f );
         }
     }
 }
@@ -420,7 +425,7 @@ public class CatAskForFoodState : CatStateBase // 要食物狀態 -> completed �
 
     public override void Enter()
     {
-        cat.animator.Play("sitting");
+        cat.animator.CrossFade("sitting", 0.5f);
         Debug.Log("Cat is now asking for food.");
     }
 
