@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Collections.Generic;
 using UnityEngine;
 using System;
 
@@ -9,11 +8,15 @@ public class FavorSystem : MonoBehaviour
 {
     // Start is called before the first frame updatevoid Start()
 
-    public Dictionary<String, int> favorDict;
+    public Dictionary<String, int> favorDict, adoptDict;
     public static string version = "0";
+
+    AchieveSystem achieveSystem;
     void Start()
     {
         favorDict = new Dictionary<string, int>();
+        adoptDict = new Dictionary<string, int>();
+        achieveSystem = FindObjectOfType<AchieveSystem>();
         InitSaveIfNeeded("XR_CAMP 成就系統格式 - favor.csv", "favor.csv");
         LoadFavor("favor.csv");
     }
@@ -57,6 +60,7 @@ public class FavorSystem : MonoBehaviour
 
         string[] lines = File.ReadAllLines(path);
         favorDict.Clear();
+        adoptDict.Clear();
         //跳過版本檢查
         for (int i = 1; i < lines.Length; i++)
         {
@@ -73,6 +77,7 @@ public class FavorSystem : MonoBehaviour
                 if (int.TryParse(parts[1], out int value))
                 {
                     favorDict[parts[0]] = value;
+                    adoptDict[parts[0]] = value;
                 }
             }
         }
@@ -93,7 +98,7 @@ public class FavorSystem : MonoBehaviour
             // 寫入所有進度資料
             foreach (var pair in favorDict)
             {
-                writer.WriteLine($"{pair.Key},{pair.Value}");
+                writer.WriteLine($"{pair.Key},{pair.Value},{adoptDict[pair.Key]}");
             }
         }
 
@@ -110,6 +115,13 @@ public class FavorSystem : MonoBehaviour
     public int GetFavor(string catname)
     {
         return favorDict[catname];
+    }
+
+    public void SetAdopt(string catname)
+    {
+        adoptDict[catname] = 1;
+        achieveSystem.UpdateProgress("adopt", 1);
+        Savefavor("favor.csv");
     }
 
 }

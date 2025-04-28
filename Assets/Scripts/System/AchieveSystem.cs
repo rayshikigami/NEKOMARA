@@ -14,6 +14,8 @@ public class AchieveSystem : MonoBehaviour
     public List<string> AchieveDiscribe;
     public static string version = "0";
 
+    
+
     void Start()
     {
         progressData = new Dictionary<string, int>();

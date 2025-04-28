@@ -6,7 +6,7 @@ using System;
 
 public class CatHouse : MonoBehaviour
 {
-    public GameObject[] CatList;
+    public List<GameObject> CatList;
     float timer = 3;
     Vector3 prevPosition;
     Quaternion prevRotation;
@@ -14,6 +14,11 @@ public class CatHouse : MonoBehaviour
     bool OnTheFloor = false;
     public bool isSummon = false;
     public GameObject grabInteractor;
+    public GameObject catForThisHouse;
+
+    public int catID = -99;
+
+    public GameObject smokeParticle;
     // Start is called before the first frame update
     void Start()
     {
@@ -21,6 +26,10 @@ public class CatHouse : MonoBehaviour
         prevRotation = transform.rotation;
         OnTheFloor = false;
         isSummon = false;
+        // CatList.Add(GameObject.Find("cat1"));
+        // CatList.Add(GameObject.Find("cat2"));
+        // CatList.Add(GameObject.Find("cat3"));
+
     }
 
     // Update is called once per frame
@@ -37,7 +46,6 @@ public class CatHouse : MonoBehaviour
                 prevPosition = transform.position;
                 prevRotation = transform.rotation;
                 timer = 3;
-
             }
 
             if (timer <= 0 && !isSummon)
@@ -48,7 +56,11 @@ public class CatHouse : MonoBehaviour
                 FindObjectOfType<AchieveSystem>().UpdateProgress("set_object", 1);
                 FindObjectOfType<AchieveSystem>().UpdateProgress("summon", 1);
                 GetComponent<AudioSource>().Play();
-                summon(0);//要召喚的貓的id
+                if (catID == -99)
+                {
+                    catID = UnityEngine.Random.Range(0, 3);
+                }
+                summon(catID);//要召喚的貓的id
             }
         }
     }
@@ -57,7 +69,11 @@ public class CatHouse : MonoBehaviour
     {
         print("召喚貓");
         FindObjectOfType<AchieveSystem>().UpdateProgress("summon", 1);
-        Instantiate(CatList[id], transform.position + new Vector3(0, 0.3f, 0), transform.rotation);
+        catForThisHouse = CatList[id];
+        catForThisHouse.SetActive(true);
+        catForThisHouse.transform.position = transform.position + new Vector3(0, 0.3f, 0);
+
+        Instantiate(smokeParticle, transform.position, transform.rotation);
         FindObjectOfType<NavBuilder>().BuildMap();
 
     }
@@ -80,6 +96,13 @@ public class CatHouse : MonoBehaviour
             OnTheFloor = false;
             timer = 3;
         }
+    }
+
+    public void OnDestroy()
+    {
+        Instantiate(smokeParticle, transform.position, transform.rotation);
+        catForThisHouse.SetActive(false);
+        //Destroy(catForThisHouse);//這邊之後要改成setActive(false);
     }
 
 }
