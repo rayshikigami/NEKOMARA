@@ -745,7 +745,7 @@ public class CatStateManager : MonoBehaviour
         }
 
         // LoadAudioClips("Audio/catSound/catNormalMeow", ref meowClips);
-        nextMeowTime = Time.time + Random.Range(5f, 10f); // Set the initial meow time
+        nextMeowTime = Time.time + Random.Range(35f, 60f); // Set the initial meow time
         setLastSeeUserTime();
         ChangeState(new CatIdleState(this));
     }
@@ -822,6 +822,8 @@ public class CatStateManager : MonoBehaviour
             pos.y = hit.position.y ; // Adjust the height to match the ground level
             transform.position = pos;
         }
+        
+        
         if (this.isFollowing){
             this.LookAtUser();
         }
