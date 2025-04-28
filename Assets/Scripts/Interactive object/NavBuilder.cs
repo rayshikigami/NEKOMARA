@@ -13,9 +13,11 @@ public class NavBuilder : MonoBehaviour
 
     public GameObject cat;
     public bool isSetMap = false;
+    public SceneNavigation sn;
     void Start()
     {
-        isSetMap = false;
+        StartCoroutine(DelayedInit());
+        isSetMap = false; sn = GetComponent<SceneNavigation>();
     }
     void Update()
     {
@@ -35,7 +37,7 @@ public class NavBuilder : MonoBehaviour
     IEnumerator DelayedInit()
     {
         yield return new WaitForSeconds(3.0f); // 等 SDK 生成 Mesh
-        surface.BuildNavMesh();
+        //surface.BuildNavMesh();
         yield return new WaitForSeconds(1.0f); // 等建完
         AutoLinkAnchors();
         yield return new WaitForSeconds(1.0f); // 等建完
@@ -46,8 +48,10 @@ public class NavBuilder : MonoBehaviour
             {
                 cat.gameObject.SetActive(true);
                 cat.transform.position = new Vector3(0, 0.5f, 0);
+                sn.Agents.Add(cat.GetComponent<NavMeshAgent>());
             }
         }
+        sn.BuildSceneNavMesh();
         
     }
 

@@ -7,7 +7,7 @@ public class CatTower : MonoBehaviour
 {
     // Start is called before the first frame update
 
-    float timer = 3;
+    public float timer = 3;
     Vector3 prevPosition;
     Quaternion prevRotation;
 
@@ -23,9 +23,12 @@ public class CatTower : MonoBehaviour
     }
     void FixedUpdate()
     {
-        print(Math.Abs(transform.rotation.x));
-        if (!isSet && OnTheFloor && Math.Abs(transform.eulerAngles.x) < 3 && Math.Abs(transform.eulerAngles.z) < 3)
+        print(Math.Abs(transform.eulerAngles.x));
+        print(Math.Abs(transform.eulerAngles.z));
+
+        if (!isSet && OnTheFloor && (Math.Abs(transform.eulerAngles.x) < 3 || Math.Abs(transform.eulerAngles.x) > 357) && (Math.Abs(transform.eulerAngles.z) < 3 || Math.Abs(transform.eulerAngles.z) > 357))
         {
+            print(" on the floor");
             if (prevPosition == transform.position && prevRotation == transform.rotation)
             {
                 timer -= Time.fixedDeltaTime;
@@ -45,7 +48,7 @@ public class CatTower : MonoBehaviour
                 GetComponent<SphereCollider>().enabled = true;
                 grabInteractor.SetActive(false);
                 GetComponent<AudioSource>().Play();
-                FindObjectOfType<NavBuilder>().BuildMap();
+                //FindObjectOfType<NavBuilder>().BuildMap();
                 FindObjectOfType<AchieveSystem>().UpdateProgress("set_object", 1);
                 timer = 3;
             }

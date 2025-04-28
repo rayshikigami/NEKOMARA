@@ -37,7 +37,7 @@ public class CatHouse : MonoBehaviour
     {
         if (OnTheFloor && !isSummon)
         {
-            if (prevPosition == transform.position && prevRotation == transform.rotation && Math.Abs(transform.eulerAngles.x) < 3 && Math.Abs(transform.eulerAngles.z) < 3)
+            if (prevPosition == transform.position && prevRotation == transform.rotation && (Math.Abs(transform.eulerAngles.x) < 3 || Math.Abs(transform.eulerAngles.x) > 357) && (Math.Abs(transform.eulerAngles.z) < 3 || Math.Abs(transform.eulerAngles.z) > 357))
             {
                 timer -= Time.fixedDeltaTime;
             }
@@ -74,7 +74,7 @@ public class CatHouse : MonoBehaviour
         catForThisHouse.transform.position = transform.position + new Vector3(0, 0.3f, 0);
 
         Instantiate(smokeParticle, transform.position, transform.rotation);
-        FindObjectOfType<NavBuilder>().BuildMap();
+        //FindObjectOfType<NavBuilder>().BuildMap();
 
     }
 
@@ -98,7 +98,7 @@ public class CatHouse : MonoBehaviour
         }
     }
 
-    public void OnDestroy()
+    public void breakTheHouse()
     {
         Instantiate(smokeParticle, transform.position, transform.rotation);
         catForThisHouse.SetActive(false);

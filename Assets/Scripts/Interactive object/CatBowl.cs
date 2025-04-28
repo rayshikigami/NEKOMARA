@@ -30,7 +30,7 @@ public class CatBowl : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (!isSet && OnTheFloor && Math.Abs(transform.eulerAngles.x) < 3 && Math.Abs(transform.eulerAngles.z) < 3)
+        if (!isSet && OnTheFloor && (Math.Abs(transform.eulerAngles.x) < 3 || Math.Abs(transform.eulerAngles.x) > 357) && (Math.Abs(transform.eulerAngles.z) < 3 || Math.Abs(transform.eulerAngles.z) > 357))
         {
             if (prevPosition == transform.position && prevRotation == transform.rotation)
             {

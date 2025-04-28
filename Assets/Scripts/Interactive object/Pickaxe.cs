@@ -11,9 +11,16 @@ public class Pickaxe : MonoBehaviour
     {
         if(collision.gameObject.CompareTag("SceneObject")||collision.gameObject.CompareTag("InteractObject")||collision.gameObject.CompareTag("foodpack"))
         {
+
             print("break the object");
             Destroy(collision.gameObject);
             GetComponent<AudioSource>().Play();
+        }
+        if(collision.gameObject.CompareTag("catHouse"))
+        {
+            print("break the cat house");
+            collision.gameObject.GetComponent<CatHouse>().breakTheHouse();
+            collision.gameObject.SetActive(false);
         }
     }
 }

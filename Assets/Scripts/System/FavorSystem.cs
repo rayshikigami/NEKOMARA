@@ -68,7 +68,7 @@ public class FavorSystem : MonoBehaviour
             if (string.IsNullOrEmpty(line)) continue;
 
             string[] parts = line.Split(',');
-            if (parts.Length != 2) continue;
+            if (parts.Length != 3) continue;
 
 
             else
