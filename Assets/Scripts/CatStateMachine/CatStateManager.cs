@@ -1,5 +1,7 @@
 using UnityEngine;
 using UnityEngine.Networking;
+using System.Collections.Generic;
+using System.Collections;
 using System.IO;
 
 public abstract class CatStateBase
@@ -19,14 +21,20 @@ public abstract class CatStateBase
             if(!cat.sleeping && !cat.sitting ) // 如果貓咪沒有睡覺，並且貓咪沒有坐下
             {
                 if( cat.IsUserVisible()){
-                    if(cat.wantFollow()){
-                        cat.ChangeState(new CatFollowState(cat)); // 轉換到跟隨狀態
-                        cat.isFollowing = true; // Set the following flag to true
-                    }else if(cat.wantFlee()){
-                        cat.ChangeState(new CatFleeState(cat)); // 轉換到逃跑狀態
+                    if(Time.time - cat.getLastSeeUserTime() > 10f){
+                        cat.setLastSeeUserTime();
+                        if(cat.wantFollow()){
+                            cat.ChangeState(new CatFollowState(cat)); // 轉換到跟隨狀態
+                            cat.isFollowing = true; // Set the following flag to true
+                        }else if(cat.wantFlee()){
+                            cat.ChangeState(new CatFleeState(cat)); // 轉換到逃跑狀態
+                        }else{
+                            this.Update();
+                        }
                     }else{
                         this.Update();
                     }
+                    
                 }else if(cat.othercat != null || cat.IsOtherCatVisible()){
                     cat.ChangeState(new CatPlayWithOtherCatState(cat)); // 轉換到跟隨狀態
                 }else{
@@ -58,14 +66,15 @@ public class CatIdleState : CatStateBase // 閒置狀態
 
     public override void Update()
     {   
-        if(cat.hungerSystem.GetHunger(cat.catName) < 30){
-            GameObject food = cat.FindFood();
+        if(cat.hungerSystem.GetHunger(cat.catName) < 30 ){
+            GameObject food = cat.FindFavorFood();
             if (food != null)
             {
                 cat.ChangeState(new CatMoveToObjectState(cat, food, new CatEatState(cat, food)));
                 return;
             }else{
-                // 如果找不到食物，就要求食物地方
+                cat.ChangeState(new CatAskForFoodState(cat, food));
+                return ;
             }
         }
         if (Time.time - cat.stateEnterTime > idleDuration)
@@ -76,8 +85,7 @@ public class CatIdleState : CatStateBase // 閒置狀態
             switch (randomState)
             {
                 case 0:
-                    GameObject food = cat.FindFood();
-                    cat.ChangeState(new CatMoveToObjectState(cat, food, new CatEatState(cat, food)));
+                    cat.ChangeState(new CatWanderState(cat));
                     break;
                 case 1:
                     cat.ChangeState(new CatSleepState(cat));
@@ -89,7 +97,8 @@ public class CatIdleState : CatStateBase // 閒置狀態
                     cat.ChangeState(new CatGroomingState(cat));
                     break;
                 case 4:
-                    cat.ChangeState(new CatMoveToObjectState(cat,  cat.FindBox(), new CatPlayWithItemState(cat)));
+                    GameObject box = cat.FindBox();
+                    cat.ChangeState(new CatMoveToObjectState(cat,  box, new CatPlayWithItemState(cat, box)));
                     break;
                 default:
                     cat.ChangeState(new CatIdleState(cat));
@@ -134,6 +143,7 @@ public class CatSleepState : CatStateBase // 睡覺狀態 -> completed? 缺少�
         Debug.Log("Cat is now sleeping.");
         cat.animator.CrossFade("sleep",1f);
         cat.sleeping = true; // Set the sleeping flag to true
+        cat.audioSource.PlayOneShot(cat.sleepClips[Random.Range(0, cat.sleepClips.Length)]);
     }
     public override void Update()
     {
@@ -141,6 +151,13 @@ public class CatSleepState : CatStateBase // 睡覺狀態 -> completed? 缺少�
         {
             cat.sleeping = false;
             cat.ChangeState(new CatIdleState(cat));
+            return;
+        }
+        // Check if the cat audio is finished playing
+        if (cat.audioSource.isPlaying == false)
+        {
+            // Play a random sleep sound
+            cat.audioSource.PlayOneShot(cat.sleepClips[Random.Range(0, cat.sleepClips.Length)]);
         }
     }
 }
@@ -205,7 +222,7 @@ public class CatMoveToObjectState : CatStateBase // 移動到物件狀態
         Vector3 offset = targetPosition - cat.transform.position;
         offset.y = 0; // Set y to 0 to ignore height difference
         offset.Normalize(); // Normalize the direction vector
-        targetPosition = targetPosition - offset * 0.25f; // Set the target position to be in front of the target
+        targetPosition = targetPosition - offset * 0.2f; // Set the target position to be in front of the target
         cat.agent.SetDestination(targetPosition); // Set the destination to the target's position
     }
 
@@ -225,13 +242,17 @@ public class CatEatState : CatStateBase // 吃東西狀態 -> completed
     private float eatDuration = 10f; // Duration of eating
     private GameObject food; // The food object to eat
     private CatBowl catBowlScript;
+    private int foodType; // The food type to eat
 
     public CatEatState(CatStateManager cat, GameObject food) : base(cat)
     {
         // this.eatDuration = Random.Range(f, 5f); // Random eat duration between 2 and 5 seconds
         this.food = food;
         if (food != null){
-            catBowlScript = food.GetComponent<CatBowl>();
+            foodType = food.GetComponent<CatFood>().foodType;
+            if(foodType == 0){
+                catBowlScript = food.GetComponent<CatBowl>();
+            }
         }
     }
 
@@ -239,16 +260,23 @@ public class CatEatState : CatStateBase // 吃東西狀態 -> completed
     {
         if( food == null){
             Debug.Log("Cat is now eating nothing.");
-            cat.ChangeState(new CatIdleState(cat)); // Transition to idle state after eating nothing
+            cat.ChangeState(new CatAskForFoodState(cat,food)); // Transition to idle state after eating nothing
             return;
         }
         Debug.Log("Cat is now wanna eating.");
-        if(catBowlScript.isFull ){
+        if(foodType != 0 || catBowlScript.isFull ){
             Debug.Log("Cat is now eating.");
             cat.animator.CrossFade("eating", 0.25f);
             cat.hungerSystem.AddHunger(cat.catName,50); // Add hunger points when eating
-            cat.favorSystem.AddFavor(cat.catName, 10); // Decrease favor points when fleeing
-            cat.achieveSystem.UpdateProgress("favor_up", 10);
+            // plat random eat sound
+            cat.audioSource.PlayOneShot(cat.eatClips[Random.Range(0, cat.eatClips.Length)]);
+            if(cat.favorateFood == foodType){
+                cat.favorSystem.AddFavor(cat.catName, 10); // Increase favor points when eating favorite food
+                cat.achieveSystem.UpdateProgress("favor_up", 10);
+            }else{
+                cat.favorSystem.AddFavor(cat.catName, 5); // Increase favor points when eating food
+                cat.achieveSystem.UpdateProgress("favor_up", 5);
+            }
         }else{
             cat.ChangeState(new CatAskForFoodState(cat,food));
         }
@@ -261,8 +289,12 @@ public class CatEatState : CatStateBase // 吃東西狀態 -> completed
         if (Time.time - cat.stateEnterTime > eatDuration)
         {
             cat.ChangeState(new CatIdleState(cat)); // Transition to idle state after eating
-            
-            catBowlScript.isFull = false; // Set the food bowl to not full after eating
+            // stop audio 
+            cat.audioSource.Stop();
+            if(foodType == 0)
+            {
+                catBowlScript.isFull = false; // Set the food bowl to not full after eating
+            }
             return;
         }
         AnimatorStateInfo stateInfo = cat.animator.GetCurrentAnimatorStateInfo(0);
@@ -271,6 +303,11 @@ public class CatEatState : CatStateBase // 吃東西狀態 -> completed
         {
             Debug.Log(stateInfo.normalizedTime);
             cat.animator.Play("eating",  0, 0.25f );
+        }
+        if (cat.audioSource.isPlaying == false)
+        {
+            // Play a random eat sound
+            cat.audioSource.PlayOneShot(cat.eatClips[Random.Range(0, cat.eatClips.Length)]);
         }
     }
 }
@@ -296,27 +333,51 @@ public class CatDrinkState : CatStateBase // 喝水狀態 -> 之後整合至eati
         {
             cat.ChangeState(new CatIdleState(cat)); // Transition to idle state after eating
         }
+        AnimatorStateInfo stateInfo = cat.animator.GetCurrentAnimatorStateInfo(0);
+    
+        if ( stateInfo.normalizedTime >= 1.0f)
+        {
+            Debug.Log(stateInfo.normalizedTime);
+            cat.animator.Play("eating",  0, 0.25f );
+        }
     }
 }
 
 public class CatPlayWithItemState : CatStateBase // 玩玩具狀態
 {
     // randomly play with item for 2~5 seconds, then change to CatIdleState
-    public CatPlayWithItemState(CatStateManager cat) : base(cat) { }
+    private float playDuration = 0f; // Duration of playing with item
+    private GameObject item; // The item to play with
+    public CatPlayWithItemState(CatStateManager cat, GameObject item) : base(cat) { 
+        this.item = item;
+    }
 
     public override void Enter()
     {
+        playDuration = Random.Range(2f, 5f); // Random play duration between 2 and 5 seconds
         Debug.Log("Cat is now playing with item.");
-        cat.animator.Play("play");
+        // 計算箱子的朝向 euler angle
+
+        cat.animator.Play("jump");
     }
 
     public override void Update()
     {
         
-        if (cat.animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1.0f )
+        
+        if (Time.time - cat.stateEnterTime > playDuration)
         {
-            cat.ChangeState(new CatIdleState(cat)); 
+            cat.ChangeState(new CatIdleState(cat)); // Transition to idle state after playing with item
         }
+        AnimatorStateInfo stateInfo = cat.animator.GetCurrentAnimatorStateInfo(0);
+
+        if ( stateInfo.normalizedTime >= 1.0f)
+        {
+            cat.animator.Play("scratch");
+        }else{
+            cat.transform.position += cat.transform.forward * 0.01f; 
+        }
+
     }
 }
 
@@ -373,7 +434,7 @@ public class CatPlayWithCatTeaserState : CatStateBase // 玩逗貓棒狀態
 
     public override void Update()
     {
-        cat.FollowToyPointer(); // Follow the toy pointer logic here
+        cat.FollowToyPointer(); 
     }
 }
 
@@ -384,8 +445,8 @@ public class CatPetState : CatStateBase // 撫摸狀態 -> completed
     public override void Enter()
     {
         cat.achieveSystem.UpdateProgress("touch", 1);
-        cat.favorSystem.AddFavor(cat.catName, 2); // Decrease favor points when fleeing
-        cat.achieveSystem.UpdateProgress("favor_up", 2);
+        cat.favorSystem.AddFavor(cat.catName, 5); // Decrease favor points when fleeing
+        cat.achieveSystem.UpdateProgress("favor_up",5);
         cat.animator.Play("Petted");
     }
 
@@ -417,36 +478,92 @@ public class CatAskForFoodState : CatStateBase // 要食物狀態 -> completed �
 {   
     private GameObject food; // The food object to eat
     private CatBowl catBowlScript;
+    private int foodType; // The food type to eat
     private float askDuration = 10f; // Duration of asking for food
+    private int askCount = 0; // Ask for food count
     public CatAskForFoodState(CatStateManager cat, GameObject food) : base(cat) {
         this.food = food;
-        catBowlScript = food.GetComponent<CatBowl>();
+        if (food != null){
+            this.catBowlScript = food.GetComponent<CatBowl>();
+            this.foodType = food.GetComponent<CatFood>().foodType;
+        }
+    }
+    public CatAskForFoodState(CatStateManager cat, GameObject food, int ac) : base(cat) {
+        this.food = food;
+        if (food != null){
+            this.catBowlScript = food.GetComponent<CatBowl>();
+            this.foodType = food.GetComponent<CatFood>().foodType;
+        }
+        this.askCount = ac;
     }
 
     public override void Enter()
     {
         cat.animator.CrossFade("sitting", 0.5f);
         Debug.Log("Cat is now asking for food.");
+        cat.audioSource.pitch = 1.5f;
+        cat.audioSource.PlayOneShot(cat.meowClips[0]); // Play meow sound when asking for food
+        cat.nextMeowTime = Time.time + Random.Range(5f, 10f); 
     }
-
     public override void Update()
     {
         // Ask for food logic here, if needed
         // For now, just wait for the duration to end
         // if animation is finished, change to CatIdleState
-        
-        if (catBowlScript.isFull ){
-            cat.ChangeState(new CatEatState(cat,food)); // Transition to idle state after asking for food
-        }else{
-            if (Time.time - cat.stateEnterTime > askDuration)
-            {
-                cat.ChangeState(new CatAskForFoodState(cat,food)); // Transition to idle state after asking for food
-                cat.favorSystem.AddFavor(cat.catName, -1); // Decrease favor points when fleeing
-                cat.achieveSystem.UpdateProgress("favor_down", 1);
+
+        if(this.food != null){
+            if(this.foodType == 0){
+                if(this.catBowlScript.isFull){
+                    cat.ChangeState(new CatEatState(cat, food)); // Transition to eat state after asking for food
+                    cat.audioSource.pitch = 1.0f;
+                }else{
+                    if (Time.time - cat.stateEnterTime > askDuration)
+                    {
+                        cat.favorSystem.AddFavor(cat.catName, -3 * (askCount+1)); // Decrease favor points when fleeing
+                        cat.achieveSystem.UpdateProgress("favor_down", 3 * (askCount+1));
+                        if(askCount < 3){
+                            cat.ChangeState(new CatAskForFoodState(cat,food, this.askCount + 1)); // Transition to idle state after asking for food
+                        }else{
+                            GameObject newfood = cat.FindFood();
+                            if(newfood == this.food){
+                                cat.ChangeState(new CatAskForFoodState(cat,food, this.askCount + 1));
+                            }
+                            cat.ChangeState(new CatMoveToObjectState(cat, newfood, new CatEatState(cat, newfood)));
+                            cat.audioSource.pitch = 1.0f;
+                        }
+                    }
+                }
+            }else if(this.foodType == 1){
+                cat.ChangeState(new CatMoveToObjectState(cat, food, new CatEatState(cat, food)));
+                 cat.audioSource.pitch = 1.0f;
+            }else if(this.foodType == 2){
+                cat.ChangeState(new CatMoveToObjectState(cat, food, new CatEatState(cat, food)));
+                 cat.audioSource.pitch = 1.0f;
+            }else if(this.foodType == 3){
+                cat.ChangeState(new CatMoveToObjectState(cat, food, new CatEatState(cat, food)));
+                 cat.audioSource.pitch = 1.0f;
+            }
+        }
+        if(Time.time - cat.stateEnterTime > 3f){
+            cat.audioSource.pitch = 1.0f;
+        }
+        if (Time.time - cat.stateEnterTime > askDuration)
+        {
+            cat.favorSystem.AddFavor(cat.catName, -3 * (askCount+1)); // Decrease favor points when fleeing
+            cat.achieveSystem.UpdateProgress("favor_down", 3 * (askCount+1));
+            if(askCount < 3){
+                GameObject newfood = cat.FindFavorFood();
+                cat.ChangeState(new CatAskForFoodState(cat,newfood, this.askCount + 1)); // Transition to idle state after asking for food
+            }else{
+                GameObject newfood = cat.FindFood();
+                if(newfood != null){
+                    cat.ChangeState(new CatMoveToObjectState(cat, newfood, new CatEatState(cat, newfood)));
+                    cat.audioSource.pitch = 1.0f;
+                }
+                cat.ChangeState(new CatAskForFoodState(cat,newfood, this.askCount + 1));
             }
             
         }
-        
     }
 }
 
@@ -567,8 +684,8 @@ public class CatStateManager : MonoBehaviour
     public AudioSource audioSource; // Reference to the AudioSource component
     public AudioClip[] meowClips; // Array of meow sound clips
     public AudioClip[] eatClips; // Array of purr sound clips
-    public AudioClip[] drinkClips; // Array of purr sound clips
     public AudioClip[] scratchClips; // Array of scratch sound clips
+    public AudioClip[] sleepClips; // Array of scratch sound clips
     public UnityEngine.AI.NavMeshAgent agent; // Reference to the NavMeshAgent for movement
     public GameObject catSkeleton; // Reference to the cat skeleton prefab
     public GameObject user; // Reference to the user object
@@ -577,17 +694,18 @@ public class CatStateManager : MonoBehaviour
     public FavorSystem favorSystem;
     public HungerSystem hungerSystem; // Reference to the hunger system
     public float stateEnterTime;
-    public float lastMeowTime; // Duration of the current state
+    public float nextMeowTime; // Duration of the current state
     public Transform headBone;
-    public float maxHeadTurnAngle = 60f;
+    public float maxHeadTurnAngle = 30f;
     public float headTurnSpeed = 5f;
-    public int favorateFood = 0; 
-    // personalty with random number 0~1f
-    public float personalty;
+    public int favorateFood = 0; // Favorite food type (0: find bowl, 1: can, 2: fish, 3: 抹茶巴菲?)
+    // personality with random number 0~1f
+    public float personality;
+    private float lastSeeUserTime ; // Duration of the current state
     void Start()
     {   
         transform.position = user.transform.position ; // Set the initial position of the cat to the user's position
-        personalty = Random.Range(0f, 1f); // Set the personalty to a random number between 0 and 1
+        personality = Random.Range(0f, 1f); // Set the personality to a random number between 0 and 1
         if (UnityEngine.AI.NavMesh.SamplePosition(transform.position, out UnityEngine.AI.NavMeshHit hit, 2f, UnityEngine.AI.NavMesh.AllAreas))
         {
             agent.Warp(hit.position);  
@@ -611,10 +729,16 @@ public class CatStateManager : MonoBehaviour
         }
 
         // LoadAudioClips("Audio/catSound/catNormalMeow", ref meowClips);
-        lastMeowTime = Time.time;
+        nextMeowTime = Time.time + Random.Range(5f, 10f); // Set the initial meow time
+        setLastSeeUserTime();
         ChangeState(new CatIdleState(this));
     }
-
+    public float getLastSeeUserTime(){
+        return this.lastSeeUserTime;
+    }
+    public void setLastSeeUserTime(){
+        this.lastSeeUserTime = Time.time;
+    }
     void LoadAudioClips(string folderPath, ref AudioClip[] clipArray)
     {
         // 確保路徑格式正確，並獲取所有 .mp3 檔案的路徑
@@ -665,11 +789,12 @@ public class CatStateManager : MonoBehaviour
     {
         currentState?.OnUpdate();
         // 每隔一段時間隨機叫一次
-        if (Time.time - lastMeowTime > Random.Range(5f, 10f) )
+        if (Time.time > nextMeowTime )
         {
             int randomIndex = Random.Range(0, meowClips.Length);
             audioSource.PlayOneShot(meowClips[randomIndex]);
-            lastMeowTime = Time.time; // Reset the timer after meowing
+            nextMeowTime = Time.time +  Random.Range(5f, 10f); // Reset the timer after meowing
+            hungerSystem.AddHunger(catName, -Random.Range(5, 10)); // Decrease hunger points when meowing
         }
     }
 
@@ -695,6 +820,15 @@ public class CatStateManager : MonoBehaviour
         currentState.Enter();
     }
 
+    public void WakeUp()
+    {
+        if (sleeping)
+        {
+            sleeping = false; // Set the sleeping flag to false
+            ChangeState(new CatIdleState(this)); // Transition to idle state after waking up
+        }
+    }
+
     public void MoveToRandomPoint() { 
         Vector3 randomDirection = Random.insideUnitSphere * 5f;
         randomDirection += transform.position;
@@ -716,7 +850,7 @@ public class CatStateManager : MonoBehaviour
         // Check if the user is visible to the cat
         Vector3 directionToUser = user.transform.position - transform.position;
         float angle = Vector3.Angle(transform.forward, directionToUser);
-        if (angle < 45f) // Adjust the angle as needed
+        if (angle < 30f) // Adjust the angle as needed
         {
             RaycastHit hit;
             if (Physics.Raycast(transform.position, directionToUser.normalized, out hit, 10f)) // Adjust the distance as needed
@@ -766,9 +900,12 @@ public class CatStateManager : MonoBehaviour
         return false; // No other cat is visible
 
     }
+
+
     public bool wantFollow() { 
         float x = Random.Range(0f, 1f); // 隨機生成一個 0~1 的數字
-        if (x > personalty) // 如果大於 personalty 的話，就跟隨
+        float y = this.favorSystem.GetFavor(this.catName)/10f; // 將 favor 轉換為 sigmoid 函數的值
+        if (x * y > personality) // 如果大於 personality 的話，就跟隨
         {
             return true; // Follow the user
         }
@@ -776,7 +913,8 @@ public class CatStateManager : MonoBehaviour
     }
     public bool wantFlee() { 
         float x = Random.Range(0f, 1f); // 隨機生成一個 0~1 的數字
-        if (x < personalty * personalty * 0.5)
+        float y = this.favorSystem.GetFavor(this.catName)/10f;
+        if (x * y < personality * personality * 0.5)
         {
             return true; // flee 
         }
@@ -840,20 +978,72 @@ public class CatStateManager : MonoBehaviour
             Vector3 targetPosition = toyPointer.transform.position;
             if (UnityEngine.AI.NavMesh.SamplePosition(targetPosition, out UnityEngine.AI.NavMeshHit hit, 1f, UnityEngine.AI.NavMesh.AllAreas))
             {
-                agent.SetDestination(hit.position);
+                if ((hit.position - transform.position).magnitude < 0.5f) // Check if the distance is greater than 0.5f
+                {
+                    this.favorSystem.AddFavor(this.catName, 3); // Decrease favor points when fleeing
+                    this.achieveSystem.UpdateProgress("favor_up", 10);
+                    // Set the destination to the toy pointer's position
+                    
+                }
+                
             }
         }
         
         
     }
-    public void AttackUser() { /* Follow laser/target logic */ }
+    public void AttackUser() {
+        if (user != null)
+        {
+            Vector3 targetPosition = user.transform.position;
+            Vector3 direction = (targetPosition - transform.position).normalized;
+
+        }
+    }
     public GameObject FindFood() { 
         // find the food position in the scene, and return the position
-        var allFoods = Resources.FindObjectsOfTypeAll<CatBowl>();
+        var allFoods = Resources.FindObjectsOfTypeAll<CatFood>();
+        // find food's with the same type as the cat's favorite food, if two or more, return random one
+
         int length = allFoods.Length;
         if (length > 0)
         {
-            return allFoods[Random.Range(0, length)].gameObject;
+            List<CatFood> Foods = new List<CatFood>();
+            foreach (var food in allFoods)
+            {
+                if (food.foodType != 0)
+                {
+                    Foods.Add(food);
+                }
+            }
+            Debug.Log("foods length: " + Foods.Count);
+            if (Foods.Count > 0)
+            {
+                return Foods[Random.Range(0, Foods.Count)].gameObject;
+            }
+        }
+        return null;
+    }
+    public GameObject FindFavorFood() { 
+        // find the food position in the scene, and return the position
+        var allFoods = Resources.FindObjectsOfTypeAll<CatFood>();
+        // find food's with the same type as the cat's favorite food, if two or more, return random one
+
+        int length = allFoods.Length;
+        if (length > 0)
+        {
+            List<CatFood> favorFoods = new List<CatFood>();
+            foreach (var food in allFoods)
+            {
+                if (food.foodType == this.favorateFood)
+                {
+                    favorFoods.Add(food);
+                }
+            }
+            Debug.Log("favor foods length: " + favorFoods.Count);
+            if (favorFoods.Count > 0)
+            {
+                return favorFoods[Random.Range(0, favorFoods.Count)].gameObject;
+            }
         }
         return null;
     }

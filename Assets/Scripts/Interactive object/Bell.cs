@@ -49,6 +49,18 @@ public class Bell : MonoBehaviour
         if (timer <= 0)
         {
             //叫醒貓
+            // find all obect with tag "Cat"
+            GameObject[] cats = GameObject.FindGameObjectsWithTag("cat");
+            foreach (GameObject cat in cats)
+            {
+                // get the Cat script and call the WakeUp method
+                CatStateManager csm = cat.GetComponent<CatStateManager>();
+                if (csm != null)
+                {
+                    csm.WakeUp();
+                }
+            }
+
         }
         lastPosition = transform.position;
         lastRotation = transform.rotation;

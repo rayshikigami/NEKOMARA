@@ -15231,6 +15231,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: -9202605092671148497, guid: 229255483e55baa489a47c57eed664de, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1003497114}
+    - targetCorrespondingSourceObject: {fileID: -9202605092671148497, guid: 229255483e55baa489a47c57eed664de, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1003497116}
   m_SourcePrefab: {fileID: 7446590082972375451, guid: 229255483e55baa489a47c57eed664de, type: 3}
 --- !u!1 &1003497112 stripped
 GameObject:
@@ -15290,6 +15293,19 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &1003497116
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1003497112}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a43f13b2fbc10a48bc83012abd2ee60, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  foodType: 1
 --- !u!1 &1007717132
 GameObject:
   m_ObjectHideFlags: 0
@@ -22921,6 +22937,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: -9202605092671148497, guid: 6f7bae755e6f4284c888926970ab9ebd, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1487801985}
+    - targetCorrespondingSourceObject: {fileID: -9202605092671148497, guid: 6f7bae755e6f4284c888926970ab9ebd, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1487801986}
   m_SourcePrefab: {fileID: 7446590082972375451, guid: 6f7bae755e6f4284c888926970ab9ebd, type: 3}
 --- !u!1 &1487801979 stripped
 GameObject:
@@ -23114,6 +23133,19 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &1487801986
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1487801979}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a43f13b2fbc10a48bc83012abd2ee60, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  foodType: 0
 --- !u!1 &1490205156
 GameObject:
   m_ObjectHideFlags: 0
@@ -25127,8 +25159,8 @@ MonoBehaviour:
   audioSource: {fileID: 1646676023}
   meowClips: []
   eatClips: []
-  drinkClips: []
   scratchClips: []
+  sleepClips: []
   agent: {fileID: 1646676018}
   catSkeleton: {fileID: 1646676016}
   user: {fileID: 0}
@@ -25137,12 +25169,12 @@ MonoBehaviour:
   favorSystem: {fileID: 2048762373}
   hungerSystem: {fileID: 296567051}
   stateEnterTime: 0
-  lastMeowTime: 0
+  nextMeowTime: 0
   headBone: {fileID: 0}
   maxHeadTurnAngle: 60
   headTurnSpeed: 5
   favorateFood: 0
-  personalty: 0
+  personality: 0
 --- !u!23 &1646676020
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -28698,23 +28730,28 @@ MonoBehaviour:
   - {fileID: 8300000, guid: f4611e3ee883c8b4b85e1856bb4c6b64, type: 3}
   - {fileID: 8300000, guid: 53afb1d070ca0794297bf2149f446c24, type: 3}
   - {fileID: 8300000, guid: 214816feb90f2944a8fe87e49c8f8e23, type: 3}
-  eatClips: []
-  drinkClips: []
+  eatClips:
+  - {fileID: 8300000, guid: 80f7a4ff04c9e814c9cee6a6916a8825, type: 3}
   scratchClips: []
+  sleepClips:
+  - {fileID: 8300000, guid: 3719a6eb89872bf4f8afd7942fd8b308, type: 3}
+  - {fileID: 8300000, guid: bf70629aec17c4a42930290ed551961c, type: 3}
+  - {fileID: 8300000, guid: b130651b886827e4bba7a119025cb10a, type: 3}
+  - {fileID: 8300000, guid: 7cff821dfb6bacb4289860a5610a030d, type: 3}
   agent: {fileID: 1889755254}
   catSkeleton: {fileID: 0}
-  user: {fileID: 2106691358}
+  user: {fileID: 1487801979}
   othercat: {fileID: 0}
   achieveSystem: {fileID: 2048762371}
   favorSystem: {fileID: 2048762373}
   hungerSystem: {fileID: 296567051}
   stateEnterTime: 0
-  lastMeowTime: 0
+  nextMeowTime: 0
   headBone: {fileID: 0}
   maxHeadTurnAngle: 60
   headTurnSpeed: 5
   favorateFood: 0
-  personalty: 0
+  personality: 0
 --- !u!1 &1891894134
 GameObject:
   m_ObjectHideFlags: 0
@@ -30692,6 +30729,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: -9202605092671148497, guid: 9ebdf9d36b291b2408ace9aa8d5c13d1, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2040677474}
+    - targetCorrespondingSourceObject: {fileID: -9202605092671148497, guid: 9ebdf9d36b291b2408ace9aa8d5c13d1, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2040677476}
   m_SourcePrefab: {fileID: 7446590082972375451, guid: 9ebdf9d36b291b2408ace9aa8d5c13d1, type: 3}
 --- !u!1 &2040677472 stripped
 GameObject:
@@ -30751,6 +30791,19 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &2040677476
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2040677472}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a43f13b2fbc10a48bc83012abd2ee60, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  foodType: 3
 --- !u!1 &2048762370
 GameObject:
   m_ObjectHideFlags: 0
@@ -32945,8 +32998,8 @@ MonoBehaviour:
   audioSource: {fileID: 2137350222}
   meowClips: []
   eatClips: []
-  drinkClips: []
   scratchClips: []
+  sleepClips: []
   agent: {fileID: 2137350221}
   catSkeleton: {fileID: 2137350220}
   user: {fileID: 2040677472}
@@ -32955,12 +33008,12 @@ MonoBehaviour:
   favorSystem: {fileID: 2048762373}
   hungerSystem: {fileID: 296567051}
   stateEnterTime: 0
-  lastMeowTime: 0
+  nextMeowTime: 0
   headBone: {fileID: 0}
   maxHeadTurnAngle: 60
   headTurnSpeed: 5
   favorateFood: 0
-  personalty: 0
+  personality: 0
 --- !u!95 &2137350224 stripped
 Animator:
   m_CorrespondingSourceObject: {fileID: 5866666021909216657, guid: 8519e6a6eb1e8e64eaf71d608fe85e96, type: 3}
