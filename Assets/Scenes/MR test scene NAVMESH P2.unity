@@ -3104,7 +3104,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -9202605092671148497, guid: 2376a070a641a0747a6bced1b6f484ef, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -9202605092671148497, guid: 2376a070a641a0747a6bced1b6f484ef, type: 3}
       propertyPath: m_TagString
@@ -3304,7 +3304,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ad1558339cf41354cb33284ff4efef5c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  grabInteractor: {fileID: 0}
+  grabInteractor: {fileID: 770660738}
   OnTheFloor: 0
   isSet: 0
 --- !u!135 &253079169

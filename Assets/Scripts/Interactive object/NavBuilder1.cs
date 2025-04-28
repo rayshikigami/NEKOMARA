@@ -16,12 +16,12 @@ public class NavBuilder1 : MonoBehaviour
     public SceneNavigation sn;
     void Start()
     {
-        isSetMap = false;        StartCoroutine(DelayedInit());
+        isSetMap = false; StartCoroutine(DelayedInit());
         sn = GetComponent<SceneNavigation>();
     }
     void Update()
     {
-        if(Input.GetKeyDown(KeyCode.Z))
+        if (Input.GetKeyDown(KeyCode.Z))
         {
             BuildMap();
         }
@@ -53,7 +53,7 @@ public class NavBuilder1 : MonoBehaviour
             }
         }
         sn.BuildSceneNavMesh();
-        
+
     }
 
     void AutoLinkAnchors()
@@ -86,24 +86,45 @@ public class NavBuilder1 : MonoBehaviour
             }
         }
     }
-
     Vector3 FindClosestEdgeTowards(GameObject from, GameObject target)
     {
+        // 計算目標物體的方向
         Vector3 dir = (target.transform.position - from.transform.position).normalized;
 
-        // 如果有 Collider，用它的 bounds 算邊緣點
-        Collider col = from.GetComponentInChildren<Collider>();
-        if (col != null)
+        // 查找錨點的所有子物件中的 Collider
+        Collider[] colliders = from.GetComponentsInChildren<Collider>();
+
+        // 假設錨點有子物件，並且這些子物件有 Collider
+        foreach (var col in colliders)
         {
-            Bounds bounds = col.bounds;
-            Vector3 edge = bounds.center + Vector3.Scale(dir, bounds.extents);
-            edge.y = bounds.center.y; // 保持原高度
-            return edge;
+            if (col != null)
+            {
+                // 計算該子物件的 Bounds
+                Bounds bounds = col.bounds;
+
+                // 計算平台的上邊緣位置 (y 軸為上邊界)
+                Vector3 edge = bounds.center + Vector3.Scale(dir, bounds.extents);
+
+                // 將 y 值設為平台的上邊緣
+                edge.y = bounds.max.y;  // 設置為上邊界
+
+                // 避免穿越 Collider: 檢查射線是否會與 Collider 相交
+                RaycastHit hit;
+                Vector3 checkStart = edge + dir * 0.1f;  // 將起點微調一點
+                if (Physics.Raycast(checkStart, dir, out hit, 0.2f)) // 如果射線會碰到物體
+                {
+                    // 射線檢查後微調位置，將邊緣推到稍微遠離的地方
+                    edge = hit.point + dir * 0.2f; // 將邊緣點推離一點，避免碰撞
+                }
+
+                return edge;
+            }
         }
 
-        // 沒有 Collider 就 fallback
+        // 如果沒有找到 Collider，返回錨點的 position
         return from.transform.position;
     }
+
 
     void CreateNavLink(Vector3 start, Vector3 end)
     {
