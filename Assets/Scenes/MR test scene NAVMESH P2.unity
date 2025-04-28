@@ -187,6 +187,10 @@ PrefabInstance:
       value: cat teaser
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: f3325935a5272c84a886c5d554c0c61c, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: f3325935a5272c84a886c5d554c0c61c, type: 3}
       propertyPath: m_TagString
       value: InteractObject
       objectReference: {fileID: 0}
@@ -3097,6 +3101,10 @@ PrefabInstance:
     - target: {fileID: -9202605092671148497, guid: 2376a070a641a0747a6bced1b6f484ef, type: 3}
       propertyPath: m_Name
       value: "\u8DF3\u53F0"
+      objectReference: {fileID: 0}
+    - target: {fileID: -9202605092671148497, guid: 2376a070a641a0747a6bced1b6f484ef, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -9202605092671148497, guid: 2376a070a641a0747a6bced1b6f484ef, type: 3}
       propertyPath: m_TagString
@@ -7333,7 +7341,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &501124299
 Transform:
   m_ObjectHideFlags: 0
@@ -11910,6 +11918,10 @@ PrefabInstance:
       value: cats_food_pack
       objectReference: {fileID: 0}
     - target: {fileID: -9202605092671148497, guid: bc0120ad48fba714fb9cb5da31bf0ecc, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -9202605092671148497, guid: bc0120ad48fba714fb9cb5da31bf0ecc, type: 3}
       propertyPath: m_TagString
       value: foodpack
       objectReference: {fileID: 0}
@@ -14676,6 +14688,10 @@ PrefabInstance:
       value: capurrrcino
       objectReference: {fileID: 0}
     - target: {fileID: -9202605092671148497, guid: 229255483e55baa489a47c57eed664de, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -9202605092671148497, guid: 229255483e55baa489a47c57eed664de, type: 3}
       propertyPath: m_TagString
       value: Food
       objectReference: {fileID: 0}
@@ -15866,7 +15882,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1087259412
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -22344,7 +22360,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -9202605092671148497, guid: 6f7bae755e6f4284c888926970ab9ebd, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -9202605092671148497, guid: 6f7bae755e6f4284c888926970ab9ebd, type: 3}
       propertyPath: m_TagString
@@ -24319,7 +24335,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1638133166
 Transform:
   m_ObjectHideFlags: 0
@@ -24845,6 +24861,10 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: d0ce62bf40e333a4c8054b147696a850, type: 3}
       propertyPath: m_Name
       value: "\u8C93\u7AA9"
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: d0ce62bf40e333a4c8054b147696a850, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: d0ce62bf40e333a4c8054b147696a850, type: 3}
       propertyPath: m_TagString
@@ -27270,8 +27290,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1868029646}
   - component: {fileID: 1868029648}
-  - component: {fileID: 1868029647}
   - component: {fileID: 1868029649}
+  - component: {fileID: 1868029650}
   m_Layer: 0
   m_Name: NavmeshBuilder
   m_TagString: Untagged
@@ -27294,23 +27314,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1868029647
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1868029645}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 32e931134ad98e245a65082a863a6206, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  surface: {fileID: 1868029648}
-  maxJumpHeight: 3
-  maxJumpDistance: 5
-  cat: {fileID: 2137350220}
-  isSetMap: 0
 --- !u!114 &1868029648
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -27355,10 +27358,10 @@ MonoBehaviour:
   BuildOnSceneLoaded: 1
   CollectGeometry: 1
   CollectObjects: 2
-  AgentRadius: 0.2
+  AgentRadius: 0.1
   AgentHeight: 0.5
-  AgentClimb: 0.04
-  AgentMaxSlope: 90
+  AgentClimb: 0
+  AgentMaxSlope: 0
   Agents: []
   NavigableSurfaces: 32767
   SceneObstacles: 16382
@@ -27376,6 +27379,24 @@ MonoBehaviour:
   <OnNavMeshInitialized>k__BackingField:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &1868029650
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1868029645}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d7960f5ce66ffa64490905660705c469, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  surface: {fileID: 0}
+  maxJumpHeight: 2
+  maxJumpDistance: 5
+  cat: {fileID: 1889755251}
+  isSetMap: 0
+  sn: {fileID: 0}
 --- !u!1 &1869396256
 GameObject:
   m_ObjectHideFlags: 0
@@ -27890,7 +27911,7 @@ MonoBehaviour:
   catSkeleton: {fileID: 0}
   user: {fileID: 2106691358}
   othercat: {fileID: 0}
-  achieveSystem: {fileID: 0}
+  achieveSystem: {fileID: 2048762371}
   favorSystem: {fileID: 2048762373}
   hungerSystem: {fileID: 296567051}
   stateEnterTime: 0
@@ -29807,6 +29828,10 @@ PrefabInstance:
       value: tripo_pbr_model_04cead81-0df3-42d5-8c45-35a1a72bfbae
       objectReference: {fileID: 0}
     - target: {fileID: -9202605092671148497, guid: 9ebdf9d36b291b2408ace9aa8d5c13d1, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -9202605092671148497, guid: 9ebdf9d36b291b2408ace9aa8d5c13d1, type: 3}
       propertyPath: m_TagString
       value: Food
       objectReference: {fileID: 0}
@@ -30990,6 +31015,10 @@ PrefabInstance:
     - target: {fileID: -9202605092671148497, guid: 9a636936c43999649934cfdb5640dc08, type: 3}
       propertyPath: m_Name
       value: PICKAXE
+      objectReference: {fileID: 0}
+    - target: {fileID: -9202605092671148497, guid: 9a636936c43999649934cfdb5640dc08, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -9202605092671148497, guid: 9a636936c43999649934cfdb5640dc08, type: 3}
       propertyPath: m_TagString
@@ -32440,7 +32469,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6183343135054397837, guid: 90e60a01a29980f40a6beb453df92b83, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6183343135054397837, guid: 90e60a01a29980f40a6beb453df92b83, type: 3}
       propertyPath: m_TagString
