@@ -357,8 +357,24 @@ public class CatPlayWithItemState : CatStateBase // 玩玩具狀態
         playDuration = Random.Range(2f, 5f); // Random play duration between 2 and 5 seconds
         Debug.Log("Cat is now playing with item.");
         // 計算箱子的朝向 euler angle
-
-        cat.animator.Play("jump");
+        // 找 item/Cube(4)的 transform
+        
+        Transform itemTransform = item.transform.Find("Cube (4)");
+        if (itemTransform != null)
+        {
+            Vector3 pos = item.transform.position;
+            Vector3 itemPosition = itemTransform.position;
+            Vector3 offset = pos - itemPosition;
+            if(pos.y > 0.2f){
+                // 跳進去
+            }else if(pos.y < -0.2f){
+                // just scratch the box
+            }else{
+                // set cat position to the position pos + offset
+                Vector3 targetPosition = pos + offset;
+                cat.agent.SetDestination(targetPosition); // Set the destination to the target's position
+            }
+        }
     }
 
     public override void Update()
@@ -853,7 +869,7 @@ public class CatStateManager : MonoBehaviour
         if (angle < 30f) // Adjust the angle as needed
         {
             RaycastHit hit;
-            if (Physics.Raycast(transform.position, directionToUser.normalized, out hit, 10f)) // Adjust the distance as needed
+            if (Physics.Raycast(transform.position, directionToUser.normalized, out hit, 2f)) // Adjust the distance as needed
             {
                 if (hit.collider.gameObject == user)
                 {
@@ -875,10 +891,10 @@ public class CatStateManager : MonoBehaviour
                 // Check if the other cat is visible to the cat
                 Vector3 directionToOtherCat = cat.transform.position - transform.position;
                 float angle = Vector3.Angle(transform.forward, directionToOtherCat);
-                if (angle < 45f) // Adjust the angle as needed
+                if (angle < 30f) // Adjust the angle as needed
                 {
                     RaycastHit hit;
-                    if (Physics.Raycast(transform.position, directionToOtherCat.normalized, out hit, 10f)) // Adjust the distance as needed
+                    if (Physics.Raycast(transform.position, directionToOtherCat.normalized, out hit, 2f)) // Adjust the distance as needed
                     {
                         if (hit.collider.gameObject == cat)
                         {
@@ -1058,18 +1074,6 @@ public class CatStateManager : MonoBehaviour
         }
         return null;
     }
-    public void setFrontPosition(GameObject target) { 
-        if (target != null)
-        {
-            Vector3 direction = (target.transform.position - transform.position).normalized;
-            Vector3 targetPosition = target.transform.position - direction * 0.31f;
-            if (UnityEngine.AI.NavMesh.SamplePosition(targetPosition, out UnityEngine.AI.NavMeshHit hit, 1f, UnityEngine.AI.NavMesh.AllAreas))
-            {
-                agent.SetDestination(hit.position);
-            }
-        }
-    }
-
     public int getRandomStateNumber( float[] stateProbabilities){
         float totalProbability = 0f;
         foreach (float probability in stateProbabilities)
