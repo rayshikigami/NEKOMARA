@@ -52,6 +52,7 @@ public class CatBowl : MonoBehaviour
                 FindObjectOfType<AchieveSystem>().UpdateProgress("set_object", 1);
                 GetComponent<AudioSource>().Play();
                 timer = 3;
+                GetComponent<resetPosition>().SetPosition();
             }
         }
     }

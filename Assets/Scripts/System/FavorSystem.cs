@@ -110,6 +110,10 @@ public class FavorSystem : MonoBehaviour
     {
         favorDict[catname] += count;
         Savefavor("favor.csv");
+        if (favorDict[catname] >= 30)//好感大於30者收編
+        {
+            SetAdopt(catname);
+        }
     }
 
     public int GetFavor(string catname)
@@ -122,6 +126,7 @@ public class FavorSystem : MonoBehaviour
         adoptDict[catname] = 1;
         achieveSystem.UpdateProgress("adopt", 1);
         Savefavor("favor.csv");
+        //開放使用對應貓窩
     }
 
 }

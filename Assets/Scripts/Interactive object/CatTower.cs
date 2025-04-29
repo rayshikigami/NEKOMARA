@@ -51,6 +51,7 @@ public class CatTower : MonoBehaviour
                 //FindObjectOfType<NavBuilder>().BuildMap();
                 FindObjectOfType<AchieveSystem>().UpdateProgress("set_object", 1);
                 timer = 3;
+                GetComponent<resetPosition>().SetPosition();
             }
         }
     }

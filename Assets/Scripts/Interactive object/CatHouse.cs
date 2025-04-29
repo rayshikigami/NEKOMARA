@@ -55,6 +55,7 @@ public class CatHouse : MonoBehaviour
                 grabInteractor.SetActive(false);
                 FindObjectOfType<AchieveSystem>().UpdateProgress("set_object", 1);
                 FindObjectOfType<AchieveSystem>().UpdateProgress("summon", 1);
+                GetComponent<resetPosition>().SetPosition();
                 GetComponent<AudioSource>().Play();
                 if (catID == -99)
                 {
@@ -100,8 +101,12 @@ public class CatHouse : MonoBehaviour
 
     public void breakTheHouse()
     {
-        Instantiate(smokeParticle, transform.position, transform.rotation);
+        Instantiate(smokeParticle, catForThisHouse.transform.position, catForThisHouse.transform.rotation);
         catForThisHouse.SetActive(false);
+        OnTheFloor = false;
+        isSummon = false;
+        timer = 3;
+        grabInteractor.SetActive(true);
         //Destroy(catForThisHouse);//這邊之後要改成setActive(false);
     }
 

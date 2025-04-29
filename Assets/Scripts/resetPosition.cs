@@ -24,4 +24,9 @@ public class resetPosition : MonoBehaviour
             transform.position = initialPosition;
         }
     }
+
+    public void SetPosition()
+    {
+        initialPosition = transform.position;
+    }
 }

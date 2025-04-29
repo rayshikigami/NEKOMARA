@@ -21,6 +21,8 @@ public class Pickaxe : MonoBehaviour
             print("break the cat house");
             collision.gameObject.GetComponent<CatHouse>().breakTheHouse();
             collision.gameObject.SetActive(false);
+            
+            GetComponent<AudioSource>().Play();
         }
     }
 }
