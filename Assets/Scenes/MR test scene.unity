@@ -23822,7 +23822,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   leftHand: {fileID: 0}
-  gestureMenuCanvas: {fileID: 0}
+  gestureMenuCanvas: {fileID: 1466000285}
   gestureStatusText: {fileID: 0}
 --- !u!1 &1469020675
 GameObject:
