@@ -6,10 +6,12 @@ using UnityEngine;
 public class resetPosition : MonoBehaviour
 {
     private Vector3 initialPosition; // 儲存初始位置
+    private Vector3 initialEulerAngle;
 
     void Start()
     {
         initialPosition = transform.position; // 在腳本啟動時記錄初始位置
+        initialEulerAngle = transform.eulerAngles;
     }
 
     void Update()
@@ -22,11 +24,13 @@ public class resetPosition : MonoBehaviour
 
             // 將物件傳送回初始位置
             transform.position = initialPosition;
+            transform.eulerAngles = initialEulerAngle;
         }
     }
 
     public void SetPosition()
     {
+        initialEulerAngle = transform.eulerAngles;
         initialPosition = transform.position;
     }
 }

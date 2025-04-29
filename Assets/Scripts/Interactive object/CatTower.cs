@@ -45,6 +45,7 @@ public class CatTower : MonoBehaviour
             {
                 isSet = true;
                 GetComponent<SphereCollider>().enabled = true;
+                GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezePosition | RigidbodyConstraints.FreezeRotation;
                 grabInteractor.SetActive(false);
                 GetComponent<AudioSource>().Play();
                 //FindObjectOfType<NavBuilder>().BuildMap();

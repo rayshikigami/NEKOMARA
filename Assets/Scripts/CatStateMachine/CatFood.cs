@@ -16,4 +16,9 @@ public class CatFood : MonoBehaviour
     {
         
     }
+
+    public void BeEaten()
+    {
+        Destroy(this.gameObject);
+    }
 }

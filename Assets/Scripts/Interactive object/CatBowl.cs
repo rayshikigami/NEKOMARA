@@ -51,6 +51,7 @@ public class CatBowl : MonoBehaviour
                 grabInteractor.SetActive(false);
                 FindObjectOfType<AchieveSystem>().UpdateProgress("set_object", 1);
                 GetComponent<AudioSource>().Play();
+                GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezePosition | RigidbodyConstraints.FreezeRotation;
                 timer = 3;
                 GetComponent<resetPosition>().SetPosition();
             }

@@ -56,6 +56,7 @@ public class CatHouse : MonoBehaviour
                 FindObjectOfType<AchieveSystem>().UpdateProgress("set_object", 1);
                 FindObjectOfType<AchieveSystem>().UpdateProgress("summon", 1);
                 GetComponent<resetPosition>().SetPosition();
+                GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezePosition | RigidbodyConstraints.FreezeRotation;
                 GetComponent<AudioSource>().Play();
                 if (catID == -99)
                 {
