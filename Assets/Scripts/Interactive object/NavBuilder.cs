@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 using Meta.XR.MRUtilityKit;
+using NavLinkGeneration;
 
 public class NavBuilder : MonoBehaviour
 {
@@ -21,7 +22,7 @@ public class NavBuilder : MonoBehaviour
     }
     void Update()
     {
-        if(Input.GetKeyDown(KeyCode.Z))
+        if (Input.GetKeyDown(KeyCode.Z))
         {
             BuildMap();
         }
@@ -52,7 +53,7 @@ public class NavBuilder : MonoBehaviour
             }
         }
         sn.BuildSceneNavMesh();
-        
+
     }
 
     void AutoLinkAnchors()
@@ -64,26 +65,34 @@ public class NavBuilder : MonoBehaviour
         {
             if (anchor.Label == MRUKAnchor.SceneLabels.FLOOR)
                 groundAnchors.Add(anchor);
-            else
-                platformAnchors.Add(anchor);
-        }
-
-        foreach (var ground in groundAnchors)
-        {
-            foreach (var platform in platformAnchors)
+            else if (anchor.Label == MRUKAnchor.SceneLabels.TABLE)
             {
-                Vector3 start = FindClosestEdgeTowards(ground.gameObject, platform.gameObject);
-                Vector3 end = FindClosestEdgeTowards(platform.gameObject, ground.gameObject);
+                platformAnchors.Add(anchor);
+                anchor.gameObject.AddComponent<NavLinkGenerator>();
+                NavLinkGenerator ng = anchor.gameObject.GetComponent<NavLinkGenerator>();
+                ng.NavLinkWidth = 0.5f;
+                ng.NavMeshStepHeight = 0.5f;
+                ng.CreateLinksOnChildBoxColliders();
 
-                float heightDiff = Mathf.Abs(end.y - start.y);
-                float distXZ = Vector2.Distance(new Vector2(start.x, start.z), new Vector2(end.x, end.z));
-
-                if (heightDiff <= maxJumpHeight && distXZ <= maxJumpDistance)
-                {
-                    CreateNavLink(start, end);
-                }
             }
         }
+
+        // foreach (var ground in groundAnchors)
+        // {
+        //     foreach (var platform in platformAnchors)
+        //     {
+        //         Vector3 start = FindClosestEdgeTowards(ground.gameObject, platform.gameObject);
+        //         Vector3 end = FindClosestEdgeTowards(platform.gameObject, ground.gameObject);
+
+        //         float heightDiff = Mathf.Abs(end.y - start.y);
+        //         float distXZ = Vector2.Distance(new Vector2(start.x, start.z), new Vector2(end.x, end.z));
+
+        //         if (heightDiff <= maxJumpHeight && distXZ <= maxJumpDistance)
+        //         {
+        //             CreateNavLink(start, end);
+        //         }
+        //     }
+        // }
     }
 
     Vector3 FindClosestEdgeTowards(GameObject from, GameObject target)

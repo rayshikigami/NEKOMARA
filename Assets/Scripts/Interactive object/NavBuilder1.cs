@@ -65,7 +65,7 @@ public class NavBuilder1 : MonoBehaviour
         {
             if (anchor.Label == MRUKAnchor.SceneLabels.FLOOR)
                 groundAnchors.Add(anchor);
-            else
+            else if( anchor.Label == MRUKAnchor.SceneLabels.TABLE)
                 platformAnchors.Add(anchor);
         }
 
