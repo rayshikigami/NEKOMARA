@@ -55,13 +55,13 @@ public class CatIdleState : CatStateBase // 閒置狀態
     public CatIdleState(CatStateManager cat) : base(cat) { }
     private float idleDuration = 0f; 
 
-    private float[] stateProbabilities = { 5, 0, 0, 0, 0}; // 機率 array
+    private float[] stateProbabilities = { 10f, 1f, 0, 1f, 1f, 1f}; // 機率 array
 
     public override void Enter()
     {
         cat.animator.CrossFade("idle",0.5f);
         Debug.Log("Cat is now idle.");
-        idleDuration = Random.Range(10f, 15f); 
+        idleDuration = Random.Range(3f, 5f); 
     }
 
     public override void Update()
@@ -70,7 +70,7 @@ public class CatIdleState : CatStateBase // 閒置狀態
             GameObject food = cat.FindFavorFood();
             if (food != null)
             {
-                cat.ChangeState(new CatMoveToObjectState(cat, food, new CatEatState(cat, food)));
+                cat.ChangeState(new CatMoveToObjectState(cat, food, new CatEatState(cat, food), 0.2f));
                 return;
             }else{
                 cat.ChangeState(new CatAskForFoodState(cat, food));
@@ -80,7 +80,8 @@ public class CatIdleState : CatStateBase // 閒置狀態
         if (Time.time - cat.stateEnterTime > idleDuration)
         {
             // 隨機到 CatWanderState, CatSleepState, CatRollState, CatGroomingState, CatMoveToPointState, 用 array 來表示個個機率
-            // 0: CatWanderState, 1: CatSleepState, 2: CatRollState, 3: CatGroomingState, 4: CatMoveToPointState, 5: CatPlayWithItemState
+            // 0: CatWanderState, 1: CatSleepState, 2: CatRollState, 3: CatGroomingState, 4: CatMoveToPointState and CatPlayWithItemState
+            // 5: CatPlayWithCatTowerState
             int randomState = cat.getRandomStateNumber(stateProbabilities);
             switch (randomState)
             {
@@ -98,7 +99,19 @@ public class CatIdleState : CatStateBase // 閒置狀態
                     break;
                 case 4:
                     GameObject box = cat.FindBox();
-                    cat.ChangeState(new CatMoveToObjectState(cat,  box, new CatPlayWithItemState(cat, box)));
+                    if (box == null){
+                        cat.ChangeState(new CatIdleState(cat));
+                    }else{
+                        cat.ChangeState(new CatMoveToObjectState(cat,  box, new CatPlayWithItemState(cat, box),0.6f));
+                    }
+                    break;
+                case 5:
+                    GameObject ct = cat.FindCatTower();
+                    if (ct == null){
+                        cat.ChangeState(new CatIdleState(cat));
+                    }else{
+                        cat.ChangeState(new CatMoveToObjectState(cat,  ct, new CatPlayWithCatTowerState(cat, ct), 0.8f));
+                    }
                     break;
                 default:
                     cat.ChangeState(new CatIdleState(cat));
@@ -139,9 +152,9 @@ public class CatSleepState : CatStateBase // 睡覺狀態 -> completed? 缺少�
 
     public override void Enter()
     {
-        sleepDuration = Random.Range(10f, 50f); // Random sleep duration between 10 and 50 seconds
+        sleepDuration = Random.Range(30f, 50f); // Random sleep duration between 10 and 50 seconds
         Debug.Log("Cat is now sleeping.");
-        cat.animator.CrossFade("sleep",1f);
+        cat.animator.Play("sleep");
         cat.sleeping = true; // Set the sleeping flag to true
         cat.audioSource.PlayOneShot(cat.sleepClips[Random.Range(0, cat.sleepClips.Length)]);
     }
@@ -152,6 +165,12 @@ public class CatSleepState : CatStateBase // 睡覺狀態 -> completed? 缺少�
             cat.sleeping = false;
             cat.ChangeState(new CatIdleState(cat));
             return;
+        }
+        // if animation is done, replay
+        AnimatorStateInfo stateInfo = cat.animator.GetCurrentAnimatorStateInfo(0);
+        if (stateInfo.normalizedTime >= 1.0f)
+        {
+            cat.animator.Play("sleep", 0, 0.8f);
         }
         // Check if the cat audio is finished playing
         if (cat.audioSource.isPlaying == false)
@@ -209,10 +228,12 @@ public class CatMoveToObjectState : CatStateBase // 移動到物件狀態
 {
     private GameObject target;
     private CatStateBase nextState; // The next state to transition to after reaching the target
-    public CatMoveToObjectState(CatStateManager cat, GameObject target, CatStateBase nextState) : base(cat)
+    private float ds;
+    public CatMoveToObjectState(CatStateManager cat, GameObject target, CatStateBase nextState, float ds) : base(cat)
     {
         this.target = target;
         this.nextState = nextState;
+        this.ds = ds;
     }
     public override void Enter()
     {
@@ -222,7 +243,7 @@ public class CatMoveToObjectState : CatStateBase // 移動到物件狀態
         Vector3 offset = targetPosition - cat.transform.position;
         offset.y = 0; // Set y to 0 to ignore height difference
         offset.Normalize(); // Normalize the direction vector
-        targetPosition = targetPosition - offset * 0.2f; // Set the target position to be in front of the target
+        targetPosition = targetPosition - offset * ds; // Set the target position to be in front of the target
         cat.agent.SetDestination(targetPosition); // Set the destination to the target's position
     }
 
@@ -230,7 +251,24 @@ public class CatMoveToObjectState : CatStateBase // 移動到物件狀態
     {
         if (cat.HasReachedDestination())
         {
-            cat.ChangeState(nextState); // Transition to the next state
+            // check the cat is face to the target or not, if not , rotate to the target, if it is, then change to the next state
+            Vector3 targetPosition = target.transform.position;
+            Vector3 offset = targetPosition - cat.transform.position;
+            offset.y = 0; // Set y to 0 to ignore height difference
+            offset.Normalize(); // Normalize the direction vector
+            float angle = Vector3.SignedAngle(cat.transform.forward, offset, Vector3.up);
+            if (Mathf.Abs(angle) > 5f)
+            {
+                // Rotate the cat to face the target
+                Quaternion targetRotation = Quaternion.LookRotation(offset);
+                cat.transform.rotation = Quaternion.RotateTowards(cat.transform.rotation, targetRotation, 360 * Time.deltaTime);
+            }
+            else
+            {
+                cat.ChangeState(nextState); // Transition to the next state
+            }
+
+           
         }
     }
 }
@@ -343,59 +381,182 @@ public class CatDrinkState : CatStateBase // 喝水狀態 -> 之後整合至eati
     }
 }
 
-public class CatPlayWithItemState : CatStateBase // 玩玩具狀態
+public class CatPlayWithItemState : CatStateBase
 {
-    // randomly play with item for 2~5 seconds, then change to CatIdleState
-    private float playDuration = 0f; // Duration of playing with item
-    private GameObject item; // The item to play with
-    public CatPlayWithItemState(CatStateManager cat, GameObject item) : base(cat) { 
+    private GameObject item;
+    private Transform bottomTransform;
+    private Vector3 offset;
+
+    private Vector3 originalPosition;
+
+    public CatPlayWithItemState(CatStateManager cat, GameObject item) : base(cat)
+    {
         this.item = item;
     }
 
     public override void Enter()
     {
-        playDuration = Random.Range(2f, 5f); // Random play duration between 2 and 5 seconds
         Debug.Log("Cat is now playing with item.");
-        // 計算箱子的朝向 euler angle
-        // 找 item/Cube(4)的 transform
-        
-        Transform itemTransform = item.transform.Find("Cube (4)");
-        if (itemTransform != null)
+        bottomTransform = item.transform.Find("Cube (4)");
+
+        if (bottomTransform != null)
         {
+            cat.SetJumpable(true);
             Vector3 pos = item.transform.position;
-            Vector3 itemPosition = itemTransform.position;
-            Vector3 offset = pos - itemPosition;
-            if(pos.y > 0.2f){
-                // 跳進去
-            }else if(pos.y < -0.2f){
-                // just scratch the box
-            }else{
-                // set cat position to the position pos + offset
-                Vector3 targetPosition = pos + offset;
-                cat.agent.SetDestination(targetPosition); // Set the destination to the target's position
+            Vector3 bottomPosition = bottomTransform.position;
+            offset = pos - bottomPosition;
+
+            originalPosition = cat.transform.position;
+
+            if (offset.y > 0.1f)
+            {
+                Debug.Log("開口朝上");
+                // 開口朝上
+                cat.StartCoroutine(JumpIntoBoxRoutine());
+            }
+            else if (offset.y < -0.1f)
+            {
+                Debug.Log("開口朝下");
+                // 開口朝下
+                cat.SetJumpable(false);
+                
+                cat.StartCoroutine(ScratchRoutine());
+            }
+            else
+            {
+                Debug.Log("開口朝側面");
+                // 水平開口，計算入口點
+                // Vector3 targetPosition = pos + 1.2f * offset;
+
+                // if (UnityEngine.AI.NavMesh.SamplePosition(targetPosition, out UnityEngine.AI.NavMeshHit hit, 1f, UnityEngine.AI.NavMesh.AllAreas))
+                // {
+                //     cat.StartCoroutine(EnterFromSideRoutine(hit.position));
+                // }
+                // else
+                // {
+                //     Debug.LogWarning("Failed to find NavMesh position near side entry.");
+                //     cat.SetJumpable(false);
+                //     cat.ChangeState(new CatIdleState(cat));
+                // }
+                cat.SetJumpable(false);
+                
+                cat.StartCoroutine(ScratchRoutine());
             }
         }
+        else
+        {
+            Debug.LogWarning("Could not find Cube (4) in item.");
+            cat.ChangeState(new CatIdleState(cat));
+        }
     }
 
-    public override void Update()
+    private IEnumerator JumpIntoBoxRoutine()
     {
-        
-        
-        if (Time.time - cat.stateEnterTime > playDuration)
-        {
-            cat.ChangeState(new CatIdleState(cat)); // Transition to idle state after playing with item
-        }
-        AnimatorStateInfo stateInfo = cat.animator.GetCurrentAnimatorStateInfo(0);
+        cat.animator.Play("jump");
 
-        if ( stateInfo.normalizedTime >= 1.0f)
-        {
-            cat.animator.Play("scratch");
-        }else{
-            cat.transform.position += cat.transform.forward * 0.01f; 
-        }
+        yield return JumpToPosition(item.transform.position + Vector3.down * 0.2f, 0.5f); // into box
+        yield return RotateBy180(0.5f);
+        cat.animator.CrossFade("sitting",0.25f);
+        yield return new WaitForSeconds(Random.Range(2f, 5f)); // stay inside
 
+        cat.animator.CrossFade("jump",0.25f);
+        yield return new WaitForSeconds(0.3f);
+        yield return JumpToPosition(originalPosition, 0.5f); // jump back
+        cat.SetJumpable(false);
+        cat.ChangeState(new CatIdleState(cat));
     }
+
+    private IEnumerator ScratchRoutine()
+    {
+        float moveDistance = 0.18f;
+        float moveDuration = 0.2f;
+        Vector3 startPos = cat.transform.position;
+        Vector3 targetPos = startPos + cat.transform.forward * moveDistance;
+        float elapsed = 0f;
+
+        while (elapsed < moveDuration)
+        {
+            cat.transform.position = Vector3.Lerp(startPos, targetPos, elapsed / moveDuration);
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+        cat.transform.position = targetPos;
+        cat.animator.Play("punch"); 
+
+        yield return new WaitForSeconds(2f);
+        cat.ChangeState(new CatIdleState(cat));
+    }
+
+    private IEnumerator EnterFromSideRoutine(Vector3 entryPoint)
+    {
+        cat.SetJumpable(false);
+        cat.agent.SetDestination(entryPoint);
+
+        // 等待抵達入口點
+        while (Vector3.Distance(cat.transform.position, entryPoint) > 0.2f)
+        {
+            yield return null;
+        }
+        cat.SetJumpable(true);
+        // 進入箱子（稍微往內走）
+        Vector3 insidePosition = item.transform.position - offset.normalized * 0.3f;
+        if (UnityEngine.AI.NavMesh.SamplePosition(insidePosition, out UnityEngine.AI.NavMeshHit innerHit, 1f, UnityEngine.AI.NavMesh.AllAreas))
+        {
+            cat.agent.SetDestination(innerHit.position);
+            while (Vector3.Distance(cat.transform.position, innerHit.position) > 0.2f)
+            {
+                yield return null;
+            }
+
+            yield return new WaitForSeconds(Random.Range(2f, 5f));
+
+            // 退回原地
+            cat.agent.SetDestination(originalPosition);
+            while (Vector3.Distance(cat.transform.position, originalPosition) > 0.2f)
+            {
+                yield return null;
+            }
+        }
+        cat.SetJumpable(false);
+        cat.ChangeState(new CatIdleState(cat));
+    }
+    private IEnumerator RotateBy180(float duration)
+    {
+        Quaternion startRotation = cat.transform.rotation;
+        Quaternion targetRotation = startRotation * Quaternion.Euler(0, 180, 0);
+
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            float t = elapsed / duration;
+            cat.transform.rotation = Quaternion.Slerp(startRotation, targetRotation, t);
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        cat.transform.rotation = targetRotation;
+    }
+    private IEnumerator JumpToPosition(Vector3 target, float duration)
+    {
+        Vector3 start = cat.transform.position;
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            float t = elapsed / duration;
+            Vector3 position = Vector3.Lerp(start, target, t);
+            position.y += Mathf.Sin(t * Mathf.PI) * 0.4f; // jump arc
+            cat.transform.position = position;
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        cat.transform.position = target;
+    }
+
+    public override void Update() { }
 }
+
 
 public class CatFollowState : CatStateBase // 跟隨狀態 -> 等手勢偵測
 {
@@ -412,7 +573,6 @@ public class CatFollowState : CatStateBase // 跟隨狀態 -> 等手勢偵測
             cat.FollowUser();
         }
         cat.LookAtUser();
-
     }
 }
 
@@ -464,6 +624,7 @@ public class CatPetState : CatStateBase // 撫摸狀態 -> completed
         cat.favorSystem.AddFavor(cat.catName, 5); // Decrease favor points when fleeing
         cat.achieveSystem.UpdateProgress("favor_up",5);
         cat.animator.Play("Petted");
+        cat.audioSource.PlayOneShot(cat.sleepClips[Random.Range(0, cat.sleepClips.Length)]);
     }
 
     public override void Update()
@@ -473,6 +634,8 @@ public class CatPetState : CatStateBase // 撫摸狀態 -> completed
         if (cat.animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1.0f)
         {
             cat.ChangeState(new CatFollowState(cat)); // Transition to idle state after petting
+            // stop audio
+            cat.audioSource.Stop();
         }
     }
 }
@@ -544,19 +707,19 @@ public class CatAskForFoodState : CatStateBase // 要食物狀態 -> completed �
                             if(newfood == this.food){
                                 cat.ChangeState(new CatAskForFoodState(cat,food, this.askCount + 1));
                             }
-                            cat.ChangeState(new CatMoveToObjectState(cat, newfood, new CatEatState(cat, newfood)));
+                            cat.ChangeState(new CatMoveToObjectState(cat, newfood, new CatEatState(cat, newfood), 0.2f));
                             cat.audioSource.pitch = 1.0f;
                         }
                     }
                 }
             }else if(this.foodType == 1){
-                cat.ChangeState(new CatMoveToObjectState(cat, food, new CatEatState(cat, food)));
+                cat.ChangeState(new CatMoveToObjectState(cat, food, new CatEatState(cat, food), 0.2f));
                  cat.audioSource.pitch = 1.0f;
             }else if(this.foodType == 2){
-                cat.ChangeState(new CatMoveToObjectState(cat, food, new CatEatState(cat, food)));
+                cat.ChangeState(new CatMoveToObjectState(cat, food, new CatEatState(cat, food), 0.2f));
                  cat.audioSource.pitch = 1.0f;
             }else if(this.foodType == 3){
-                cat.ChangeState(new CatMoveToObjectState(cat, food, new CatEatState(cat, food)));
+                cat.ChangeState(new CatMoveToObjectState(cat, food, new CatEatState(cat, food), 0.2f));
                  cat.audioSource.pitch = 1.0f;
             }
         }
@@ -573,7 +736,7 @@ public class CatAskForFoodState : CatStateBase // 要食物狀態 -> completed �
             }else{
                 GameObject newfood = cat.FindFood();
                 if(newfood != null){
-                    cat.ChangeState(new CatMoveToObjectState(cat, newfood, new CatEatState(cat, newfood)));
+                    cat.ChangeState(new CatMoveToObjectState(cat, newfood, new CatEatState(cat, newfood),0.2f));
                     cat.audioSource.pitch = 1.0f;
                 }
                 cat.ChangeState(new CatAskForFoodState(cat,newfood, this.askCount + 1));
@@ -589,7 +752,7 @@ public class CatPlayDeadState : CatStateBase // 裝死狀態 -> completed
 
     public override void Enter()
     {
-        cat.animator.Play("PlayDead");
+        cat.animator.Play("playdead");
     }
 
     public override void Update()
@@ -666,6 +829,111 @@ public class CatStandUpState : CatStateBase // 起立狀態 -> completed
 
 }
 
+// new CatState of play with catTower
+public class CatPlayWithCatTowerState : CatStateBase // 玩玩具狀態
+{
+    // randomly play with item for 2~5 seconds, then change to CatIdleState
+     private GameObject item;
+    private Transform top;
+    private Vector3 originalPosition;
+    private Quaternion originalRotation;
+    public CatPlayWithCatTowerState(CatStateManager cat, GameObject item) : base(cat) { 
+        this.item = item;
+        top = item.transform.Find("jump target");
+    }
+
+    public override void Enter()
+    {
+        
+        Debug.Log("Cat is now playing with cat tower.");
+        originalPosition = cat.transform.position;
+        originalRotation = cat.transform.rotation;
+        cat.SetJumpable(true); // Set the cat to be jumpable
+        cat.StartCoroutine(JumpRoutine());
+    }
+    private IEnumerator JumpRoutine()
+    {
+        // 播放跳躍動畫
+        cat.animator.Play("jump");
+
+        // 等待動畫播放起跳的瞬間 (假設0.3秒後起跳)
+        yield return new WaitForSeconds(0.1f);
+        Debug.Log("Jumped to cat tower top position.");
+        // 跳到貓塔 top 的位置
+        yield return JumpToPosition(top.position, 0.6f); // 0.6 秒完成跳躍
+        // cat.transform.Rotate(0, 180, 0); 漸轉
+        yield return RotateBy180(1.2f);
+        
+        cat.sitting = true; // Set the sitting flag to true
+        float stayDuration = Random.Range(2f, 3.5f);
+        Debug.Log("Staying on cat tower top for " + stayDuration + " seconds.");
+        cat.animator.CrossFade("sitting", 0.5f);
+        // 停留 2~5 秒
+        
+        yield return new WaitForSeconds(stayDuration);
+        // rotate 180 degree
+        
+        cat.sitting = false;
+        // 再次播放跳躍動畫
+        
+        cat.animator.CrossFade("idle", 0.25f);
+        yield return new WaitForSeconds(0.2f);
+        cat.animator.CrossFade("jump",0.25f);
+        Debug.Log("Jumped back to original position.");
+        // 跳回原地
+        yield return JumpToPosition(originalPosition, 0.6f);
+        
+        // 切換狀態
+        
+        cat.SetJumpable(false); // Set the cat to be jumpable
+        cat.ChangeState(new CatIdleState(cat));
+    }
+
+    private IEnumerator JumpToPosition(Vector3 target, float duration)
+    {
+        Vector3 start = cat.transform.position;
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            float t = elapsed / duration;
+
+            // 模擬跳躍弧線
+            Vector3 position = Vector3.Lerp(start, target, t);
+            position.y += Mathf.Sin(t * Mathf.PI) * 0.5f; // 調整跳躍高度
+
+            cat.transform.position = position;
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        cat.transform.position = target;
+    }
+    private IEnumerator RotateBy180(float duration)
+    {
+        Quaternion startRotation = cat.transform.rotation;
+        Quaternion targetRotation = startRotation * Quaternion.Euler(0, 180, 0);
+
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            float t = elapsed / duration;
+            cat.transform.rotation = Quaternion.Slerp(startRotation, targetRotation, t);
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        cat.transform.rotation = targetRotation;
+    }
+
+    public override void Update()
+    {
+        
+
+    }
+}
+
+
 public class CatPlayWithOtherCatState : CatStateBase // 玩其他貓狀態
 {
     public CatPlayWithOtherCatState(CatStateManager cat) : base(cat) { }
@@ -696,6 +964,7 @@ public class CatStateManager : MonoBehaviour
     public bool sitting = false; // Flag to check if the cat is sitting
     public bool sleeping = false; // Flag to check if the cat is sleeping
     public bool isFollowing = false; // Flag to check if the cat is following the user
+    public bool isJumpable = false;
     public Animator animator; // Reference to the Animator component
     public AudioSource audioSource; // Reference to the AudioSource component
     public AudioClip[] meowClips; // Array of meow sound clips
@@ -816,13 +1085,14 @@ public class CatStateManager : MonoBehaviour
 
     void LateUpdate()
     {
-        if (UnityEngine.AI.NavMesh.SamplePosition(transform.position, out UnityEngine.AI.NavMeshHit hit, 1f, UnityEngine.AI.NavMesh.AllAreas))
-        {
-            Vector3 pos = transform.position;
-            pos.y = hit.position.y ; // Adjust the height to match the ground level
-            transform.position = pos;
+        if(!isJumpable){
+            if (UnityEngine.AI.NavMesh.SamplePosition(transform.position, out UnityEngine.AI.NavMeshHit hit, 1f, UnityEngine.AI.NavMesh.AllAreas))
+            {
+                Vector3 pos = transform.position;
+                pos.y = hit.position.y ; // Adjust the height to match the ground level
+                transform.position = pos;
+            }
         }
-        
         
         if (this.isFollowing){
             this.LookAtUser();
@@ -844,6 +1114,17 @@ public class CatStateManager : MonoBehaviour
         {
             sleeping = false; // Set the sleeping flag to false
             ChangeState(new CatIdleState(this)); // Transition to idle state after waking up
+        }
+    }
+
+    public void SetJumpable(bool jm){
+        this.isJumpable = jm;
+        if(jm){
+            agent.enabled = false; // Disable the NavMeshAgent when jumping
+            // agent.isStopped = true; // Stop the agent
+        }else{  
+            agent.enabled = true; // Enable the NavMeshAgent when not jumping
+            // agent.isStopped = false; // Resume the agent
         }
     }
 
@@ -1068,11 +1349,23 @@ public class CatStateManager : MonoBehaviour
     // find box position
     public GameObject FindBox() { 
         // find the box position in the scene, and return the position
-        GameObject[] boxes = GameObject.FindGameObjectsWithTag("Box");
+        var boxes = Resources.FindObjectsOfTypeAll<Box>();
         int length = boxes.Length;
         if (length > 0)
         {
-            return boxes[Random.Range(0, length)];
+            return boxes[Random.Range(0, length)].gameObject;
+        }
+        Debug.Log("No box found in the scene.");
+        return null;
+    }
+
+     public GameObject FindCatTower() { 
+        // find the object with script cat Tower
+        var allCTs = Resources.FindObjectsOfTypeAll<CatTower>();
+        int length = allCTs.Length;
+        if (length > 0)
+        {
+            return allCTs[Random.Range(0, length)].gameObject;
         }
         return null;
     }

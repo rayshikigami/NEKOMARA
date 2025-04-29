@@ -2,10 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CatFood : MonoBehaviour
+public class Box : MonoBehaviour
 {
     // Start is called before the first frame update
-    public int foodType; // (0: find bowl, 1: can, 2: fish, 4: 抹茶巴菲?)
     void Start()
     {
         
@@ -15,10 +14,5 @@ public class CatFood : MonoBehaviour
     void Update()
     {
         
-    }
-
-    public void BeEaten()
-    {
-        if(foodType != 0)Destroy(this.gameObject);
     }
 }
