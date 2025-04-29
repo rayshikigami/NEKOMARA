@@ -575,6 +575,11 @@ public class CatFollowState : CatStateBase // 跟隨狀態 -> 等手勢偵測
             cat.FollowUser();
         }
         cat.LookAtUser();
+        CatTeaser catTeaser = Object.FindObjectOfType<CatTeaser>();
+        if (catTeaser != null && catTeaser.teasing)
+        {
+            cat.ChangeState(new CatPlayWithCatTeaserState(cat)); // Transition to play with cat teaser state
+        }
     }
 }
 
@@ -930,7 +935,6 @@ public class CatPlayWithCatTowerState : CatStateBase // 玩玩具狀態
     public override void Update()
     {
         
-
     }
 }
 
@@ -966,6 +970,7 @@ public class CatStateManager : MonoBehaviour
     public bool sleeping = false; // Flag to check if the cat is sleeping
     public bool isFollowing = false; // Flag to check if the cat is following the user
     public bool isJumpable = false;
+    private bool isJumping = false;
     public Animator animator; // Reference to the Animator component
     public AudioSource audioSource; // Reference to the AudioSource component
     public AudioClip[] meowClips; // Array of meow sound clips
@@ -1271,6 +1276,9 @@ public class CatStateManager : MonoBehaviour
      
     public void FollowToyPointer()
     {
+        if (isJumping){
+            return;
+        }
         GameObject toyPointer = GameObject.FindGameObjectWithTag("ToyPointer");
         if (toyPointer != null)
         {
@@ -1286,11 +1294,19 @@ public class CatStateManager : MonoBehaviour
                     // 停止 NavMeshAgent
                     this.SetJumpable(true);
 
+                    isJumping = true;
                     // 執行跳躍協程
-                    StartCoroutine(JumpToTarget(hit.position));
+                    StartCoroutine(JumpToTarget(targetPosition));
                 }
                 else
                 {
+                    // if animation is not walk, play walk
+                    AnimatorStateInfo stateInfo = this.animator.GetCurrentAnimatorStateInfo(0);
+                    if (!stateInfo.IsName("walk"))
+                    {
+                        this.animator.Play("walk");
+                    }
+                    
                     this.SetJumpable(false);
                     this.agent.SetDestination(hit.position);
                 }
@@ -1303,13 +1319,17 @@ public class CatStateManager : MonoBehaviour
     private IEnumerator JumpToTarget(Vector3 targetPos)
     {
         Debug.Log("Jumping to target position");
-        float duration = 0.5f; // 總跳躍時間
-        float jumpHeight = 1.0f; // 跳躍高度
+        float duration = 1.45f; // 總跳躍時間
         Vector3 start = transform.position;
+        targetPos = targetPos - this.transform.forward.normalized * 0.25f; // 向後移動 0.15f
+        float jumpHeight = (targetPos - start).y - 0.3f; // 跳躍高度
+        targetPos.y = start.y; // 目標位置的 y 值設置為起始位置的 y 值
+        
         // 在地上停0.5f
-        yield return new WaitForSeconds(0.5f);
+        this.animator.Play("idle");
+        yield return new WaitForSeconds(1.5f);
         // 播放跳躍動畫
-        this.animator.Play("jump"); // 確保你有一個叫 "jump" 的動畫
+        this.animator.Play("playTeaser"); // 確保你有一個叫 "jump" 的動畫
 
         float elapsed = 0f;
         while (elapsed < duration)
@@ -1326,6 +1346,8 @@ public class CatStateManager : MonoBehaviour
         }
 
         transform.position = targetPos;
+        Debug.Log("Jumping to target position finished.");
+        isJumping = false;
         this.SetJumpable(false);
     }
 

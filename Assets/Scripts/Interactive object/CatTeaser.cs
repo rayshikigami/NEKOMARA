@@ -5,9 +5,9 @@ using UnityEngine;
 public class CatTeaser : MonoBehaviour
 {
     // Start is called before the first frame update
-    public float positionThreshold = 0.05f; // ´X¥G¤£·|¦ÛµM²¾°Ê´N¯à°»´ú
+    public float positionThreshold = 0.05f; // ï¿½Xï¿½Gï¿½ï¿½ï¿½|ï¿½ÛµMï¿½ï¿½ï¿½Ê´Nï¿½à°»ï¿½ï¿½
     private Vector3 lastPosition;
-    public float rotationThreshold = 1f; // ¨¤«×®t²§ìH­È
+    public float rotationThreshold = 1f; // ï¿½ï¿½ï¿½×®tï¿½ï¿½ï¿½Hï¿½ï¿½
     private Quaternion lastRotation;
     public bool swinging = false;
     public GameObject target;
@@ -37,7 +37,7 @@ public class CatTeaser : MonoBehaviour
         else
         {
             swinging = false;
-            timer = 3;
+            timer = 5;
         }
 
         if (timer <= 0)
@@ -54,7 +54,7 @@ public class CatTeaser : MonoBehaviour
         else
         {
             swinging = true;
-            timer2 = 3;
+            timer2 = 30;
         }
 
         if(timer2<=0)

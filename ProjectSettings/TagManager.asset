@@ -12,6 +12,7 @@ TagManager:
   - InteractObject
   - Interactable
   - catHouse
+  - ToyPointer
   layers:
   - Default
   - TransparentFX
