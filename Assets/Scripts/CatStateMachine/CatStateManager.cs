@@ -55,10 +55,11 @@ public class CatIdleState : CatStateBase // 閒置狀態
     public CatIdleState(CatStateManager cat) : base(cat) { }
     private float idleDuration = 0f; 
 
-    private float[] stateProbabilities = { 10f, 1f, 0, 1f, 1f, 1f}; // 機率 array
+    private float[] stateProbabilities = { 10f, 0f, 0, 0f, 0f, 0f}; // 機率 array
 
     public override void Enter()
     {
+        
         cat.animator.CrossFade("idle",0.5f);
         Debug.Log("Cat is now idle.");
         idleDuration = Random.Range(3f, 5f); 
@@ -303,6 +304,7 @@ public class CatEatState : CatStateBase // 吃東西狀態 -> completed
         }
         Debug.Log("Cat is now wanna eating.");
         if(foodType != 0 || catBowlScript.isFull ){
+            cat.nextMeowTime = Time.time + Random.Range(20f, 30f);
             Debug.Log("Cat is now eating.");
             cat.animator.CrossFade("eating", 0.25f);
             cat.hungerSystem.AddHunger(cat.catName,50); // Add hunger points when eating
@@ -582,9 +584,8 @@ public class CatAttackUserState : CatStateBase // 攻擊玩家狀態 -> complete
 
     public override void Enter()
     {
-        cat.animator.Play("scratch");
-        cat.favorSystem.AddFavor(cat.catName, -2); // Decrease favor points when fleeing
-        cat.achieveSystem.UpdateProgress("favor_down", 2);
+        cat.animator.Play("punch");
+
         cat.AttackUser();
     }
 
@@ -605,7 +606,7 @@ public class CatPlayWithCatTeaserState : CatStateBase // 玩逗貓棒狀態
 
     public override void Enter()
     {
-        
+        Debug.Log("Cat is now playing with cat teaser.");
     }
 
     public override void Update()
@@ -682,7 +683,7 @@ public class CatAskForFoodState : CatStateBase // 要食物狀態 -> completed �
         Debug.Log("Cat is now asking for food.");
         cat.audioSource.pitch = 1.5f;
         cat.audioSource.PlayOneShot(cat.meowClips[0]); // Play meow sound when asking for food
-        cat.nextMeowTime = Time.time + Random.Range(5f, 10f); 
+        cat.nextMeowTime = Time.time + + Random.Range(20f, 30f); 
     }
     public override void Update()
     {
@@ -1078,7 +1079,7 @@ public class CatStateManager : MonoBehaviour
         {
             int randomIndex = Random.Range(0, meowClips.Length);
             audioSource.PlayOneShot(meowClips[randomIndex]);
-            nextMeowTime = Time.time +  Random.Range(5f, 10f); // Reset the timer after meowing
+            nextMeowTime = Time.time + Random.Range(20f, 30f); // Reset the timer after meowing
             hungerSystem.AddHunger(catName, -Random.Range(5, 10)); // Decrease hunger points when meowing
         }
     }
@@ -1268,34 +1269,77 @@ public class CatStateManager : MonoBehaviour
         }
     }
      
-    public void FollowToyPointer() { 
-        // Follow the toy pointer logic here
-        // For example, you can set the destination to the toy pointer's position
+    public void FollowToyPointer()
+    {
         GameObject toyPointer = GameObject.FindGameObjectWithTag("ToyPointer");
         if (toyPointer != null)
         {
             Vector3 targetPosition = toyPointer.transform.position;
-            if (UnityEngine.AI.NavMesh.SamplePosition(targetPosition, out UnityEngine.AI.NavMeshHit hit, 1f, UnityEngine.AI.NavMesh.AllAreas))
+            if (UnityEngine.AI.NavMesh.SamplePosition(targetPosition, out UnityEngine.AI.NavMeshHit hit, 5f, UnityEngine.AI.NavMesh.AllAreas))
             {
-                if ((hit.position - transform.position).magnitude < 0.5f) // Check if the distance is greater than 0.5f
+                float distance = (hit.position - transform.position).magnitude;
+                if (distance < 0.2f)
                 {
-                    this.favorSystem.AddFavor(this.catName, 3); // Decrease favor points when fleeing
-                    this.achieveSystem.UpdateProgress("favor_up", 10);
-                    // Set the destination to the toy pointer's position
-                    
+                    this.favorSystem.AddFavor(this.catName, 3);
+                    this.achieveSystem.UpdateProgress("favor_up", 3);
+
+                    // 停止 NavMeshAgent
+                    this.SetJumpable(true);
+
+                    // 執行跳躍協程
+                    StartCoroutine(JumpToTarget(hit.position));
                 }
-                
+                else
+                {
+                    this.SetJumpable(false);
+                    this.agent.SetDestination(hit.position);
+                }
             }
+        }else{
+            Debug.Log("Toy pointer not found.");
         }
-        
-        
     }
+
+    private IEnumerator JumpToTarget(Vector3 targetPos)
+    {
+        Debug.Log("Jumping to target position");
+        float duration = 0.5f; // 總跳躍時間
+        float jumpHeight = 1.0f; // 跳躍高度
+        Vector3 start = transform.position;
+        // 在地上停0.5f
+        yield return new WaitForSeconds(0.5f);
+        // 播放跳躍動畫
+        this.animator.Play("jump"); // 確保你有一個叫 "jump" 的動畫
+
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            float t = elapsed / duration;
+            // 使用拋物線軌跡
+            Vector3 position = Vector3.Lerp(start, targetPos, t);
+            position.y += jumpHeight * Mathf.Sin(Mathf.PI * t); // 拋物線
+
+            transform.position = position;
+
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        transform.position = targetPos;
+        this.SetJumpable(false);
+    }
+
     public void AttackUser() {
         if (user != null)
         {
             Vector3 targetPosition = user.transform.position;
-            Vector3 direction = (targetPosition - transform.position).normalized;
-
+            Vector3 direction = (targetPosition - transform.position);
+            // check distance between cat and user is less than 0.2f
+            if (direction.magnitude < 0.2f)
+            {
+                this.favorSystem.AddFavor(this.catName, -2); 
+                this.achieveSystem.UpdateProgress("favor_down", 2);
+            }
         }
     }
     public GameObject FindFood() { 
