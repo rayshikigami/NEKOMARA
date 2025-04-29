@@ -10957,7 +10957,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hand: {fileID: 1685331615}
-  ovrSkeleton: {fileID: 1685331614}
+  skeleton: {fileID: 1685331614}
 --- !u!1 &685420445
 GameObject:
   m_ObjectHideFlags: 0
