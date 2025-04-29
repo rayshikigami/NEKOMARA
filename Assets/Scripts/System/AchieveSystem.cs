@@ -9,9 +9,9 @@ public class AchieveSystem : MonoBehaviour
 {
     // Start is called before the first frame update
     //public TextAsset progressCSV, AchieveCSV;
-    public Dictionary<String, int> progressData, AchieveID;
-    public List<int> AchieveDone;
-    public List<string> AchieveDiscribe;
+    public Dictionary<String, int> progressData, AchieveID;//成就名稱:AchieveID.key 用foreach一個一個抓出來
+    public List<int> AchieveDone;//是否完成: AchieveDone[AchieveID[成就名稱]]
+    public List<string> AchieveDiscribe;//成就描述: AchieveDiscribe[AchieveID[成就名稱]]
     public static string version = "0";
 
     

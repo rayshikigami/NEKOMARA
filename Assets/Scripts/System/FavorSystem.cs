@@ -8,7 +8,7 @@ public class FavorSystem : MonoBehaviour
 {
     // Start is called before the first frame updatevoid Start()
 
-    public Dictionary<String, int> favorDict, adoptDict;
+    public Dictionary<String, int> favorDict, adoptDict;//好感度:favorDict[貓的名字]
     public static string version = "0";
 
     AchieveSystem achieveSystem;
