@@ -188,7 +188,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: f3325935a5272c84a886c5d554c0c61c, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: f3325935a5272c84a886c5d554c0c61c, type: 3}
       propertyPath: m_TagString
@@ -207,6 +207,12 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f3325935a5272c84a886c5d554c0c61c, type: 3}
       insertIndex: -1
       addedObject: {fileID: 9071817}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f3325935a5272c84a886c5d554c0c61c, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 9071821}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f3325935a5272c84a886c5d554c0c61c, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 9071820}
   m_SourcePrefab: {fileID: 100100000, guid: f3325935a5272c84a886c5d554c0c61c, type: 3}
 --- !u!1 &9071815 stripped
 GameObject:
@@ -266,6 +272,42 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!1 &9071819 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: -8191816139588024681, guid: f3325935a5272c84a886c5d554c0c61c, type: 3}
+  m_PrefabInstance: {fileID: 9071814}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &9071820
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9071815}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d7d7993888fdd5c4e8619fd87f289b83, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  positionThreshold: 0.05
+  rotationThreshold: 1
+  swinging: 0
+  target: {fileID: 9071819}
+  timer: 5
+  timer2: 30
+  teasing: 0
+--- !u!114 &9071821
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9071815}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: acc66004ef4947d4f8c92263babf2f9d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &13480670
 GameObject:
   m_ObjectHideFlags: 0
@@ -26566,6 +26608,7 @@ MonoBehaviour:
   sitting: 0
   sleeping: 0
   isFollowing: 0
+  isJumpable: 0
   animator: {fileID: 1646676017}
   audioSource: {fileID: 1646676023}
   meowClips: []
@@ -30664,6 +30707,7 @@ MonoBehaviour:
   sitting: 0
   sleeping: 0
   isFollowing: 0
+  isJumpable: 0
   animator: {fileID: 1889755253}
   audioSource: {fileID: 1889755255}
   meowClips:
@@ -35110,6 +35154,7 @@ MonoBehaviour:
   sitting: 0
   sleeping: 0
   isFollowing: 0
+  isJumpable: 0
   animator: {fileID: 2137350224}
   audioSource: {fileID: 2137350222}
   meowClips: []

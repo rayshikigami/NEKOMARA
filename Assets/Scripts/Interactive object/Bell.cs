@@ -21,11 +21,6 @@ public class Bell : MonoBehaviour
         ringing = false; bellSound = GetComponent<AudioSource>();
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
     void FixedUpdate()
     {
         float movement = (transform.position - lastPosition).magnitude;
