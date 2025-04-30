@@ -36169,7 +36169,6 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 3719a6eb89872bf4f8afd7942fd8b308, type: 3}
   - {fileID: 8300000, guid: bf70629aec17c4a42930290ed551961c, type: 3}
   - {fileID: 8300000, guid: b130651b886827e4bba7a119025cb10a, type: 3}
-  - {fileID: 8300000, guid: 7cff821dfb6bacb4289860a5610a030d, type: 3}
   agent: {fileID: 1889755254}
   catSkeleton: {fileID: 0}
   user: {fileID: 1332188435}
@@ -36184,8 +36183,8 @@ MonoBehaviour:
   headTurnSpeed: 5
   favorateFood: 0
   personality: 0
-  lefthand: {fileID: 0}
-  righthand: {fileID: 0}
+  lefthand: {fileID: 684150426}
+  righthand: {fileID: 749955590}
   currentAnimation: 0
 --- !u!1 &1891894134
 GameObject:
