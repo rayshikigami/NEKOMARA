@@ -17,8 +17,6 @@ public class HandGestureMenuController : MonoBehaviour
             // Debug.LogError("請確保已正確設置左手和選單Canvas的參考。");
             return;
         }
-        Debug.Log ("檢查手勢中...");
-
         bool isSixGesture = IsMakingSixGesture(leftHand);
 
         // 更新手勢偵測顯示

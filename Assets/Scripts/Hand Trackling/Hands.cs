@@ -9,6 +9,18 @@ public class Hands : MonoBehaviour
     public OVRHand hand;
     public OVRSkeleton skeleton;
 
+    public enum catGestureType
+    {
+        Normal,
+        PlayDead,
+        BackFlip,
+        Sit,
+        Stand,
+        Leave
+
+    }
+
+    public catGestureType gestureType = catGestureType.Normal; // 預設手勢為 Normal
     // Start 在遊戲開始時執行
     void Start()
     {
@@ -64,30 +76,35 @@ public class Hands : MonoBehaviour
             {
                 print("Gun");
                 state = STATE.GUN;
+                gestureType = catGestureType.Normal;
             }
 
             else if (IsZero())
             {
                 print("zero");
                 state = STATE.ZERO;
+                gestureType = catGestureType.Normal;
             }
 
             else if (IsOne())
             {
                 print("one");
                 state = STATE.ONE;
+                gestureType = catGestureType.Normal;
             }
 
             else if (IsSpider())
             {
                 print("spider");
                 //後空翻
+                gestureType = catGestureType.BackFlip;
             }
 
             else if (IsEight())
             {
                 print("eight");
                 //停止跟隨
+                gestureType = catGestureType.Leave;
             }
         }
         else if (state == STATE.GUN)
@@ -97,11 +114,13 @@ public class Hands : MonoBehaviour
                 //裝死
                 print("SHOOT");
                 state = STATE.NORMAL;
+                gestureType = catGestureType.PlayDead;
             }
             if (!IsGun())
             {
                 print("back to normal");
                 state = STATE.NORMAL;
+                gestureType = catGestureType.Normal;
             }
 
         }
@@ -110,6 +129,7 @@ public class Hands : MonoBehaviour
             if (IsOne())
             {
                 //坐下
+                gestureType = catGestureType.Sit;
                 print("sit");
                 state = STATE.NORMAL;
             }
@@ -117,6 +137,7 @@ public class Hands : MonoBehaviour
             {
                 print("back to normal");
                 state = STATE.NORMAL;
+                gestureType = catGestureType.Normal;
             }
         }
         else if (state == STATE.ONE)
@@ -125,17 +146,20 @@ public class Hands : MonoBehaviour
             {
                 //起立
                 print("stand");
+                gestureType = catGestureType.Stand;
                 state = STATE.NORMAL;
             }
             else if (!IsOne())
             {
                 print("back to normal");
                 state = STATE.NORMAL;
+                gestureType = catGestureType.Normal;
             }
         }
 
 
     }
+
     //--------------------------
     bool IsGun()
     {
