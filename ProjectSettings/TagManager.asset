@@ -13,6 +13,7 @@ TagManager:
   - Interactable
   - catHouse
   - ToyPointer
+  - catTeaser
   layers:
   - Default
   - TransparentFX

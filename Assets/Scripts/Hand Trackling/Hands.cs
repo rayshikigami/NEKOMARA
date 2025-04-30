@@ -14,22 +14,217 @@ public class Hands : MonoBehaviour
     {
         // 目前 Start 尚未設定任何初始動作
     }
-
+    public enum STATE
+    {
+        NORMAL,
+        GUN,
+        ZERO,
+        ONE,
+    }
+    STATE state = STATE.NORMAL;
     // Update 每一幀 (frame) 都會被呼叫一次
     void Update()
     {
-        Debug.LogError("CCCCC"); // 每幀輸出 "CCCCC" 至 Console，表示 Update 有正常跑
-        
-        // 判斷是否某個手指彎曲（目前註解掉的 IsSix() 是檢查特殊手勢）
-        // if (IsSix())
-        // { Debug.LogError("AAAAA"); }
-        
-        // 呼叫 IsFingerCurled 方法，檢查指定的骨頭是否達到彎曲條件
+        //if (IsGun())
+        //{
+        //    print("Gun");
+        //}
+        //if (IsOne())
+        //{
+        //    print("1");
+        //}
+        //if (IsZero())
+        //{
+        //    print("0");
+        //    //state = STATE.GUN;
+        //}
+        //if (IsSpider())
+        //{
+        //    print("spider");
+        //}
+        if (IsFingerCurled(OVRSkeleton.BoneId.Hand_Thumb1, OVRSkeleton.BoneId.Hand_Thumb2, OVRSkeleton.BoneId.Hand_Thumb3))
+        {
+            print("THUMB");
+        }
         if (IsFingerCurled(OVRSkeleton.BoneId.Hand_Index1, OVRSkeleton.BoneId.Hand_Index2, OVRSkeleton.BoneId.Hand_Index3))
         {
-            Debug.LogError("AAAAABBBBBB"); // 若符合彎曲條件，輸出 "AAAAABBBBBB"
+            print("INDEX");
         }
+        if (IsFingerCurled(OVRSkeleton.BoneId.Hand_Middle1, OVRSkeleton.BoneId.Hand_Middle2, OVRSkeleton.BoneId.Hand_Middle3))
+
+        {
+            print("MIDDLE");
+        }
+        if (IsFingerCurled(OVRSkeleton.BoneId.Hand_Ring1, OVRSkeleton.BoneId.Hand_Ring2, OVRSkeleton.BoneId.Hand_Ring3))
+        {
+            print("RING");
+        }
+
+        if (IsFingerCurled(OVRSkeleton.BoneId.Hand_Pinky1, OVRSkeleton.BoneId.Hand_Pinky2, OVRSkeleton.BoneId.Hand_Pinky3))
+        {
+            print("PINKY");
+        }
+        //***********
+        if (state == STATE.NORMAL && hand.GetHand() == OVRPlugin.Hand.HandLeft && IsSix())
+        {
+            //左手比出6 顯示menu
+            print("menu");
+        }
+        else
+        {
+            //menu消失
+        }
+
+        if (state == STATE.NORMAL)
+        {
+            if (IsGun())
+            {
+                print("Gun");
+                state = STATE.GUN;
+            }
+
+            if (IsZero())
+            {
+                print("zero");
+                state = STATE.ZERO;
+            }
+
+            if (IsOne())
+            {
+                print("one");
+                state = STATE.ONE;
+            }
+
+            if (IsSpider())
+            {
+                print("spider");
+                //後空翻
+            }
+
+            if (IsEight())
+            {
+                print("eight");
+                //停止跟隨
+            }
+        }
+        else if (state == STATE.GUN)
+        {
+            if (IsOne())
+            {
+                //裝死
+                state = STATE.NORMAL;
+            }
+            if (!IsGun())
+            {
+                state = STATE.NORMAL;
+            }
+
+        }
+        else if (state == STATE.ZERO)
+        {
+            if (IsOne())
+            {
+                //坐下
+                state = STATE.NORMAL;
+            }
+            if (!IsZero())
+            {
+                state = STATE.NORMAL;
+            }
+        }
+        else if (state == STATE.ONE)
+        {
+            if (IsZero())
+            {
+                //起立
+
+                state = STATE.NORMAL;
+            }
+            if (!IsOne())
+            {
+                state = STATE.NORMAL;
+            }
+        }
+
+
     }
+    //--------------------------
+    bool IsGun()
+    {
+        if (!IsFingerCurled(OVRSkeleton.BoneId.Hand_Thumb1, OVRSkeleton.BoneId.Hand_Thumb2, OVRSkeleton.BoneId.Hand_Thumb3) &&
+           !IsFingerCurled(OVRSkeleton.BoneId.Hand_Index1, OVRSkeleton.BoneId.Hand_Index2, OVRSkeleton.BoneId.Hand_Index3) &&
+           IsFingerCurled(OVRSkeleton.BoneId.Hand_Middle1, OVRSkeleton.BoneId.Hand_Middle2, OVRSkeleton.BoneId.Hand_Middle3) &&
+           IsFingerCurled(OVRSkeleton.BoneId.Hand_Ring1, OVRSkeleton.BoneId.Hand_Ring2, OVRSkeleton.BoneId.Hand_Ring3) &&
+           IsFingerCurled(OVRSkeleton.BoneId.Hand_Pinky1, OVRSkeleton.BoneId.Hand_Pinky2, OVRSkeleton.BoneId.Hand_Pinky3))
+        {
+            return true;
+        }
+        return false;
+    }
+
+
+    bool IsOne()
+    {
+        if (IsFingerCurled(OVRSkeleton.BoneId.Hand_Thumb1, OVRSkeleton.BoneId.Hand_Thumb2, OVRSkeleton.BoneId.Hand_Thumb3) &&
+           !IsFingerCurled(OVRSkeleton.BoneId.Hand_Index1, OVRSkeleton.BoneId.Hand_Index2, OVRSkeleton.BoneId.Hand_Index3) &&
+           IsFingerCurled(OVRSkeleton.BoneId.Hand_Middle1, OVRSkeleton.BoneId.Hand_Middle2, OVRSkeleton.BoneId.Hand_Middle3) &&
+           IsFingerCurled(OVRSkeleton.BoneId.Hand_Ring1, OVRSkeleton.BoneId.Hand_Ring2, OVRSkeleton.BoneId.Hand_Ring3) &&
+           IsFingerCurled(OVRSkeleton.BoneId.Hand_Pinky1, OVRSkeleton.BoneId.Hand_Pinky2, OVRSkeleton.BoneId.Hand_Pinky3))
+        {
+            return true;
+        }
+        return false;
+    }
+    bool IsZero()
+    {
+        if (IsFingerCurled(OVRSkeleton.BoneId.Hand_Thumb1, OVRSkeleton.BoneId.Hand_Thumb2, OVRSkeleton.BoneId.Hand_Thumb3) &&
+           IsFingerCurled(OVRSkeleton.BoneId.Hand_Index1, OVRSkeleton.BoneId.Hand_Index2, OVRSkeleton.BoneId.Hand_Index3) &&
+           IsFingerCurled(OVRSkeleton.BoneId.Hand_Middle1, OVRSkeleton.BoneId.Hand_Middle2, OVRSkeleton.BoneId.Hand_Middle3) &&
+           IsFingerCurled(OVRSkeleton.BoneId.Hand_Ring1, OVRSkeleton.BoneId.Hand_Ring2, OVRSkeleton.BoneId.Hand_Ring3) &&
+           IsFingerCurled(OVRSkeleton.BoneId.Hand_Pinky1, OVRSkeleton.BoneId.Hand_Pinky2, OVRSkeleton.BoneId.Hand_Pinky3))
+        {
+            return true;
+        }
+        return false;
+    }
+    bool IsSpider()
+    {
+        if (IsFingerCurled(OVRSkeleton.BoneId.Hand_Thumb1, OVRSkeleton.BoneId.Hand_Thumb2, OVRSkeleton.BoneId.Hand_Thumb3) &&
+           !IsFingerCurled(OVRSkeleton.BoneId.Hand_Index1, OVRSkeleton.BoneId.Hand_Index2, OVRSkeleton.BoneId.Hand_Index3) &&
+           IsFingerCurled(OVRSkeleton.BoneId.Hand_Middle1, OVRSkeleton.BoneId.Hand_Middle2, OVRSkeleton.BoneId.Hand_Middle3) &&
+           IsFingerCurled(OVRSkeleton.BoneId.Hand_Ring1, OVRSkeleton.BoneId.Hand_Ring2, OVRSkeleton.BoneId.Hand_Ring3) &&
+           !IsFingerCurled(OVRSkeleton.BoneId.Hand_Pinky1, OVRSkeleton.BoneId.Hand_Pinky2, OVRSkeleton.BoneId.Hand_Pinky3))
+        {
+            return true;
+        }
+        return false;
+    }
+    bool IsEight()
+    {
+        if (!IsFingerCurled(OVRSkeleton.BoneId.Hand_Thumb1, OVRSkeleton.BoneId.Hand_Thumb2, OVRSkeleton.BoneId.Hand_Thumb3) &&
+           !IsFingerCurled(OVRSkeleton.BoneId.Hand_Index1, OVRSkeleton.BoneId.Hand_Index2, OVRSkeleton.BoneId.Hand_Index3) &&
+           !IsFingerCurled(OVRSkeleton.BoneId.Hand_Middle1, OVRSkeleton.BoneId.Hand_Middle2, OVRSkeleton.BoneId.Hand_Middle3) &&
+           IsFingerCurled(OVRSkeleton.BoneId.Hand_Ring1, OVRSkeleton.BoneId.Hand_Ring2, OVRSkeleton.BoneId.Hand_Ring3) &&
+           IsFingerCurled(OVRSkeleton.BoneId.Hand_Pinky1, OVRSkeleton.BoneId.Hand_Pinky2, OVRSkeleton.BoneId.Hand_Pinky3))
+        {
+            return true;
+        }
+        return false;
+    }
+    bool IsSix()
+    {
+        if (!IsFingerCurled(OVRSkeleton.BoneId.Hand_Thumb1, OVRSkeleton.BoneId.Hand_Thumb2, OVRSkeleton.BoneId.Hand_Thumb3) &&
+           IsFingerCurled(OVRSkeleton.BoneId.Hand_Index1, OVRSkeleton.BoneId.Hand_Index2, OVRSkeleton.BoneId.Hand_Index3) &&
+           IsFingerCurled(OVRSkeleton.BoneId.Hand_Middle1, OVRSkeleton.BoneId.Hand_Middle2, OVRSkeleton.BoneId.Hand_Middle3) &&
+           IsFingerCurled(OVRSkeleton.BoneId.Hand_Ring1, OVRSkeleton.BoneId.Hand_Ring2, OVRSkeleton.BoneId.Hand_Ring3) &&
+           !IsFingerCurled(OVRSkeleton.BoneId.Hand_Pinky1, OVRSkeleton.BoneId.Hand_Pinky2, OVRSkeleton.BoneId.Hand_Pinky3))
+        {
+            return true;
+        }
+        return false;
+    }
+
+    //--------------------------
 
     //********手勢偵測區塊********
 
