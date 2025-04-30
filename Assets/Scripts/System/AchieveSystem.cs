@@ -233,4 +233,13 @@ public class AchieveSystem : MonoBehaviour
 
 
     }
+    public Dictionary<string, int> GetAchievements()
+    {
+        Dictionary<string, int> achievements = new Dictionary<string, int>();
+        foreach (var pair in AchieveID)
+        {
+            achievements[pair.Key] = AchieveDone[pair.Value];
+        }
+        return achievements;
+    }
 }

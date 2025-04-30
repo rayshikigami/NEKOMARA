@@ -5,6 +5,8 @@ public class HandGestureMenuController : MonoBehaviour
 {
     public Hands leftHand;  // 換成 Hands 腳本 (從Inspector拉進來)
     public GameObject gestureMenuCanvas;
+    // 其他選單(array)
+    public GameObject[] subMenus; 
     public Text gestureStatusText; // 顯示手勢狀態文字
 
     private bool isMenuVisible = true;
@@ -12,7 +14,7 @@ public class HandGestureMenuController : MonoBehaviour
     void Update()
     {
         if (leftHand == null || gestureMenuCanvas == null){
-            Debug.LogError("請確保已正確設置左手和選單Canvas的參考。");
+            // Debug.LogError("請確保已正確設置左手和選單Canvas的參考。");
             return;
         }
         Debug.Log ("檢查手勢中...");
@@ -35,6 +37,10 @@ public class HandGestureMenuController : MonoBehaviour
         {
             Debug.Log ("隱藏選單");
             gestureMenuCanvas.SetActive(false);
+            foreach (GameObject menu in subMenus)
+            {
+                menu.SetActive(false); // 隱藏所有子選單
+            }
             isMenuVisible = false;
         }
     }
