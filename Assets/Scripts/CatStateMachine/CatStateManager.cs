@@ -23,7 +23,7 @@ public abstract class CatStateBase
                 if( cat.IsUserVisible()){
                     if(Time.time - cat.getLastSeeUserTime() > 10f){
                         cat.setLastSeeUserTime();
-                        if(cat.wantFollow()){
+                        if(cat.wantFollow() || true){
                             cat.ChangeState(new CatFollowState(cat)); // 轉換到跟隨狀態
                             cat.isFollowing = true; // Set the following flag to true
                         }else if(cat.wantFlee()){
@@ -580,7 +580,6 @@ public class CatFollowState : CatStateBase // 跟隨狀態 -> 等手勢偵測 !!
             }
             
         }
-        cat.LookAtUser();
         CatTeaser catTeaser = Object.FindObjectOfType<CatTeaser>();
         if (catTeaser != null && catTeaser.teasing)
         {
@@ -590,19 +589,19 @@ public class CatFollowState : CatStateBase // 跟隨狀態 -> 等手勢偵測 !!
         }
         if( cat.IsUserVisible() ){
             lastTimeSeeUser = Time.time;
-            if(cat.hands.gestureType == Hands.catGestureType.PlayDead){
+            if(cat.lefthand.gestureType == Hands.catGestureType.PlayDead  || cat.righthand.gestureType == Hands.catGestureType.PlayDead){
                 cat.ChangeState(new CatPlayDeadState(cat));
                 return;
-            }else if(cat.hands.gestureType == Hands.catGestureType.BackFlip){
+            }else if(cat.lefthand.gestureType == Hands.catGestureType.BackFlip || cat.righthand.gestureType == Hands.catGestureType.BackFlip){
                 cat.ChangeState(new CatBackflipState(cat)); // Transition to pet state
                 return;
-            }else if(cat.hands.gestureType == Hands.catGestureType.Stand){
+            }else if(cat.lefthand.gestureType == Hands.catGestureType.Stand || cat.righthand.gestureType == Hands.catGestureType.Stand){
                 cat.ChangeState(new CatStandUpState(cat)); // Transition to flee state
                 return;
-            }else if(cat.hands.gestureType == Hands.catGestureType.Sit){
+            }else if(cat.lefthand.gestureType == Hands.catGestureType.Sit || cat.righthand.gestureType == Hands.catGestureType.Sit){
                 cat.ChangeState(new CatSitDownState(cat)); // Transition to sit state
                 return;
-            }else if(cat.hands.gestureType == Hands.catGestureType.Leave){
+            }else if(cat.lefthand.gestureType == Hands.catGestureType.Leave || cat.righthand.gestureType == Hands.catGestureType.Leave){
                 cat.sitting = false;
                 cat.ChangeState(new CatIdleState(cat)); // Transition to flee state 
                 return;
@@ -1055,15 +1054,15 @@ public class CatStateManager : MonoBehaviour
     public float stateEnterTime;
     public float nextMeowTime; // Duration of the current state
     public Transform headBone;
-    public float maxHeadTurnAngle = 30f;
+    public float maxHeadTurnAngle = 20f;
     public float headTurnSpeed = 5f;
     public int favorateFood = 0; // Favorite food type (0: find bowl, 1: can, 2: fish, 3: 抹茶巴菲?)
     // personality with random number 0~1f
     public float personality;
     private float lastSeeUserTime ; // Duration of the current state
     private float lastSeeOtherCatTime ; // Duration of the current state
-    public Hands hands; // Reference to the hands object
-
+    public Hands lefthand; // Reference to the hands object
+    public Hands righthand;
     public enum currentCatAnimation
     {
         idle,
@@ -1241,13 +1240,8 @@ public class CatStateManager : MonoBehaviour
         float angle = Vector3.Angle(transform.forward, directionToUser);
         if (angle < 30f) // Adjust the angle as needed
         {
-            RaycastHit hit;
-            if (Physics.Raycast(transform.position, directionToUser.normalized, out hit, 2f)) // Adjust the distance as needed
-            {
-                if (hit.collider.gameObject == user)
-                {
-                    return true; // User is visible
-                }
+            if (directionToUser.magnitude < 2f) {
+                return true;
             }
         }
         return false; // User is not visible
