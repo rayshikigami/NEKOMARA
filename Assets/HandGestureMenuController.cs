@@ -9,7 +9,7 @@ public class HandGestureMenuController : MonoBehaviour
     public GameObject[] subMenus; 
     public Text gestureStatusText; // 顯示手勢狀態文字
 
-    private bool isMenuVisible = true;
+    private bool isMenuVisible = false;
 
     void Update()
     {
@@ -17,7 +17,7 @@ public class HandGestureMenuController : MonoBehaviour
             // Debug.LogError("請確保已正確設置左手和選單Canvas的參考。");
             return;
         }
-        bool isSixGesture = IsMakingSixGesture(leftHand);
+        bool isSixGesture = leftHand.IsSix();
 
         // 更新手勢偵測顯示
         if (gestureStatusText != null)

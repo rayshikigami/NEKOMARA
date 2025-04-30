@@ -223,7 +223,7 @@ public class Hands : MonoBehaviour
         }
         return false;
     }
-    bool IsSix()
+    public bool IsSix()
     {
         if (!IsFingerCurled(OVRSkeleton.BoneId.XRHand_ThumbProximal, OVRSkeleton.BoneId.XRHand_ThumbDistal, OVRSkeleton.BoneId.XRHand_ThumbTip) &&
             IsFingerCurled(OVRSkeleton.BoneId.XRHand_IndexProximal, OVRSkeleton.BoneId.XRHand_IndexIntermediate, OVRSkeleton.BoneId.XRHand_IndexDistal) &&
