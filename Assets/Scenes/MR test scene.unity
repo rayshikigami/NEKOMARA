@@ -774,6 +774,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   leftHand: {fileID: 0}
   gestureMenuCanvas: {fileID: 43144428}
+  subMenus: []
   gestureStatusText: {fileID: 0}
 --- !u!114 &43144432
 MonoBehaviour:
@@ -4339,7 +4340,7 @@ MonoBehaviour:
   requestBodyTrackingPermissionOnStartup: 0
   requestFaceTrackingPermissionOnStartup: 0
   requestEyeTrackingPermissionOnStartup: 0
-  requestScenePermissionOnStartup: 0
+  requestScenePermissionOnStartup: 1
   requestRecordAudioPermissionOnStartup: 0
   _localDimming: 1
   _trackingOriginType: 1
@@ -10741,6 +10742,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   leftHand: {fileID: 0}
   gestureMenuCanvas: {fileID: 621107246}
+  subMenus: []
   gestureStatusText: {fileID: 0}
 --- !u!114 &621107250
 MonoBehaviour:
@@ -23420,6 +23422,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   leftHand: {fileID: 0}
   gestureMenuCanvas: {fileID: 1287553050}
+  subMenus: []
   gestureStatusText: {fileID: 0}
 --- !u!114 &1287553054
 MonoBehaviour:
@@ -25108,6 +25111,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2224572339884271274, guid: 65a3a58e60edd944ca575ebd8d9b1918, type: 3}
+      propertyPath: _skeletonType
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 4080046164715548392, guid: 65a3a58e60edd944ca575ebd8d9b1918, type: 3}
+      propertyPath: _meshType
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4138508052873825748, guid: 65a3a58e60edd944ca575ebd8d9b1918, type: 3}
+      propertyPath: _meshType
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 5493690362522561358, guid: 65a3a58e60edd944ca575ebd8d9b1918, type: 3}
       propertyPath: m_Name
       value: '[BuildingBlock] Camera Rig (1)'
@@ -25155,6 +25170,10 @@ PrefabInstance:
     - target: {fileID: 5970913851387492599, guid: 65a3a58e60edd944ca575ebd8d9b1918, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7495633634055027132, guid: 65a3a58e60edd944ca575ebd8d9b1918, type: 3}
+      propertyPath: _skeletonType
+      value: 5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -25848,7 +25867,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   itemTemplate: {fileID: 962356874}
-  contentParent: {fileID: 1292794804}
+  contentParent1: {fileID: 0}
+  contentParent2: {fileID: 0}
   achieveSystem: {fileID: 2048762371}
 --- !u!114 &1417208785
 MonoBehaviour:
@@ -27036,6 +27056,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   leftHand: {fileID: 0}
   gestureMenuCanvas: {fileID: 1497298898}
+  subMenus: []
   gestureStatusText: {fileID: 0}
 --- !u!114 &1497298902
 MonoBehaviour:
@@ -28297,6 +28318,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   leftHand: {fileID: 0}
   gestureMenuCanvas: {fileID: 1550378608}
+  subMenus: []
   gestureStatusText: {fileID: 0}
 --- !u!114 &1550378612
 MonoBehaviour:
@@ -31485,6 +31507,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   leftHand: {fileID: 0}
   gestureMenuCanvas: {fileID: 0}
+  subMenus: []
   gestureStatusText: {fileID: 0}
 --- !u!1 &1691248227
 GameObject:

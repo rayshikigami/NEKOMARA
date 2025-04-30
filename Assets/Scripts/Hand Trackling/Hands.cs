@@ -25,6 +25,10 @@ public class Hands : MonoBehaviour
     // Update 每一幀 (frame) 都會被呼叫一次
     void Update()
     {
+        //========================================================================================================================================
+
+        //========================================================================================================================================
+
         //if (IsGun())
         //{
         //    print("Gun");
@@ -42,28 +46,7 @@ public class Hands : MonoBehaviour
         //{
         //    print("spider");
         //}
-        if (IsFingerCurled(OVRSkeleton.BoneId.Hand_Thumb1, OVRSkeleton.BoneId.Hand_Thumb2, OVRSkeleton.BoneId.Hand_Thumb3))
-        {
-            print("THUMB");
-        }
-        if (IsFingerCurled(OVRSkeleton.BoneId.Hand_Index1, OVRSkeleton.BoneId.Hand_Index2, OVRSkeleton.BoneId.Hand_Index3))
-        {
-            print("INDEX");
-        }
-        if (IsFingerCurled(OVRSkeleton.BoneId.Hand_Middle1, OVRSkeleton.BoneId.Hand_Middle2, OVRSkeleton.BoneId.Hand_Middle3))
 
-        {
-            print("MIDDLE");
-        }
-        if (IsFingerCurled(OVRSkeleton.BoneId.Hand_Ring1, OVRSkeleton.BoneId.Hand_Ring2, OVRSkeleton.BoneId.Hand_Ring3))
-        {
-            print("RING");
-        }
-
-        if (IsFingerCurled(OVRSkeleton.BoneId.Hand_Pinky1, OVRSkeleton.BoneId.Hand_Pinky2, OVRSkeleton.BoneId.Hand_Pinky3))
-        {
-            print("PINKY");
-        }
         //***********
         if (state == STATE.NORMAL && hand.GetHand() == OVRPlugin.Hand.HandLeft && IsSix())
         {
@@ -83,25 +66,25 @@ public class Hands : MonoBehaviour
                 state = STATE.GUN;
             }
 
-            if (IsZero())
+            else if (IsZero())
             {
                 print("zero");
                 state = STATE.ZERO;
             }
 
-            if (IsOne())
+            else if (IsOne())
             {
                 print("one");
                 state = STATE.ONE;
             }
 
-            if (IsSpider())
+            else if (IsSpider())
             {
                 print("spider");
                 //後空翻
             }
 
-            if (IsEight())
+            else if (IsEight())
             {
                 print("eight");
                 //停止跟隨
@@ -112,10 +95,12 @@ public class Hands : MonoBehaviour
             if (IsOne())
             {
                 //裝死
+                print("SHOOT");
                 state = STATE.NORMAL;
             }
             if (!IsGun())
             {
+                print("back to normal");
                 state = STATE.NORMAL;
             }
 
@@ -125,10 +110,12 @@ public class Hands : MonoBehaviour
             if (IsOne())
             {
                 //坐下
+                print("sit");
                 state = STATE.NORMAL;
             }
-            if (!IsZero())
+            else if (!IsZero())
             {
+                print("back to normal");
                 state = STATE.NORMAL;
             }
         }
@@ -137,11 +124,12 @@ public class Hands : MonoBehaviour
             if (IsZero())
             {
                 //起立
-
+                print("stand");
                 state = STATE.NORMAL;
             }
-            if (!IsOne())
+            else if (!IsOne())
             {
+                print("back to normal");
                 state = STATE.NORMAL;
             }
         }
@@ -151,11 +139,11 @@ public class Hands : MonoBehaviour
     //--------------------------
     bool IsGun()
     {
-        if (!IsFingerCurled(OVRSkeleton.BoneId.Hand_Thumb1, OVRSkeleton.BoneId.Hand_Thumb2, OVRSkeleton.BoneId.Hand_Thumb3) &&
-           !IsFingerCurled(OVRSkeleton.BoneId.Hand_Index1, OVRSkeleton.BoneId.Hand_Index2, OVRSkeleton.BoneId.Hand_Index3) &&
-           IsFingerCurled(OVRSkeleton.BoneId.Hand_Middle1, OVRSkeleton.BoneId.Hand_Middle2, OVRSkeleton.BoneId.Hand_Middle3) &&
-           IsFingerCurled(OVRSkeleton.BoneId.Hand_Ring1, OVRSkeleton.BoneId.Hand_Ring2, OVRSkeleton.BoneId.Hand_Ring3) &&
-           IsFingerCurled(OVRSkeleton.BoneId.Hand_Pinky1, OVRSkeleton.BoneId.Hand_Pinky2, OVRSkeleton.BoneId.Hand_Pinky3))
+        if (!IsFingerCurled(OVRSkeleton.BoneId.XRHand_ThumbProximal, OVRSkeleton.BoneId.XRHand_ThumbDistal, OVRSkeleton.BoneId.XRHand_ThumbTip) &&
+            !IsFingerCurled(OVRSkeleton.BoneId.XRHand_IndexProximal, OVRSkeleton.BoneId.XRHand_IndexIntermediate, OVRSkeleton.BoneId.XRHand_IndexDistal) &&
+            IsFingerCurled(OVRSkeleton.BoneId.XRHand_MiddleProximal, OVRSkeleton.BoneId.XRHand_MiddleIntermediate, OVRSkeleton.BoneId.XRHand_MiddleDistal) &&
+            IsFingerCurled(OVRSkeleton.BoneId.XRHand_RingProximal, OVRSkeleton.BoneId.XRHand_RingIntermediate, OVRSkeleton.BoneId.XRHand_RingDistal) &&
+            IsFingerCurled(OVRSkeleton.BoneId.XRHand_LittleProximal, OVRSkeleton.BoneId.XRHand_LittleIntermediate, OVRSkeleton.BoneId.XRHand_LittleDistal))
         {
             return true;
         }
@@ -165,11 +153,11 @@ public class Hands : MonoBehaviour
 
     bool IsOne()
     {
-        if (IsFingerCurled(OVRSkeleton.BoneId.Hand_Thumb1, OVRSkeleton.BoneId.Hand_Thumb2, OVRSkeleton.BoneId.Hand_Thumb3) &&
-           !IsFingerCurled(OVRSkeleton.BoneId.Hand_Index1, OVRSkeleton.BoneId.Hand_Index2, OVRSkeleton.BoneId.Hand_Index3) &&
-           IsFingerCurled(OVRSkeleton.BoneId.Hand_Middle1, OVRSkeleton.BoneId.Hand_Middle2, OVRSkeleton.BoneId.Hand_Middle3) &&
-           IsFingerCurled(OVRSkeleton.BoneId.Hand_Ring1, OVRSkeleton.BoneId.Hand_Ring2, OVRSkeleton.BoneId.Hand_Ring3) &&
-           IsFingerCurled(OVRSkeleton.BoneId.Hand_Pinky1, OVRSkeleton.BoneId.Hand_Pinky2, OVRSkeleton.BoneId.Hand_Pinky3))
+        if (IsFingerCurled(OVRSkeleton.BoneId.XRHand_ThumbProximal, OVRSkeleton.BoneId.XRHand_ThumbDistal, OVRSkeleton.BoneId.XRHand_ThumbTip) &&
+            !IsFingerCurled(OVRSkeleton.BoneId.XRHand_IndexProximal, OVRSkeleton.BoneId.XRHand_IndexIntermediate, OVRSkeleton.BoneId.XRHand_IndexDistal) &&
+            IsFingerCurled(OVRSkeleton.BoneId.XRHand_MiddleProximal, OVRSkeleton.BoneId.XRHand_MiddleIntermediate, OVRSkeleton.BoneId.XRHand_MiddleDistal) &&
+            IsFingerCurled(OVRSkeleton.BoneId.XRHand_RingProximal, OVRSkeleton.BoneId.XRHand_RingIntermediate, OVRSkeleton.BoneId.XRHand_RingDistal) &&
+            IsFingerCurled(OVRSkeleton.BoneId.XRHand_LittleProximal, OVRSkeleton.BoneId.XRHand_LittleIntermediate, OVRSkeleton.BoneId.XRHand_LittleDistal))
         {
             return true;
         }
@@ -177,11 +165,11 @@ public class Hands : MonoBehaviour
     }
     bool IsZero()
     {
-        if (IsFingerCurled(OVRSkeleton.BoneId.Hand_Thumb1, OVRSkeleton.BoneId.Hand_Thumb2, OVRSkeleton.BoneId.Hand_Thumb3) &&
-           IsFingerCurled(OVRSkeleton.BoneId.Hand_Index1, OVRSkeleton.BoneId.Hand_Index2, OVRSkeleton.BoneId.Hand_Index3) &&
-           IsFingerCurled(OVRSkeleton.BoneId.Hand_Middle1, OVRSkeleton.BoneId.Hand_Middle2, OVRSkeleton.BoneId.Hand_Middle3) &&
-           IsFingerCurled(OVRSkeleton.BoneId.Hand_Ring1, OVRSkeleton.BoneId.Hand_Ring2, OVRSkeleton.BoneId.Hand_Ring3) &&
-           IsFingerCurled(OVRSkeleton.BoneId.Hand_Pinky1, OVRSkeleton.BoneId.Hand_Pinky2, OVRSkeleton.BoneId.Hand_Pinky3))
+        if (IsFingerCurled(OVRSkeleton.BoneId.XRHand_ThumbProximal, OVRSkeleton.BoneId.XRHand_ThumbDistal, OVRSkeleton.BoneId.XRHand_ThumbTip) &&
+            IsFingerCurled(OVRSkeleton.BoneId.XRHand_IndexProximal, OVRSkeleton.BoneId.XRHand_IndexIntermediate, OVRSkeleton.BoneId.XRHand_IndexDistal) &&
+            IsFingerCurled(OVRSkeleton.BoneId.XRHand_MiddleProximal, OVRSkeleton.BoneId.XRHand_MiddleIntermediate, OVRSkeleton.BoneId.XRHand_MiddleDistal) &&
+            IsFingerCurled(OVRSkeleton.BoneId.XRHand_RingProximal, OVRSkeleton.BoneId.XRHand_RingIntermediate, OVRSkeleton.BoneId.XRHand_RingDistal) &&
+            IsFingerCurled(OVRSkeleton.BoneId.XRHand_LittleProximal, OVRSkeleton.BoneId.XRHand_LittleIntermediate, OVRSkeleton.BoneId.XRHand_LittleDistal))
         {
             return true;
         }
@@ -189,11 +177,11 @@ public class Hands : MonoBehaviour
     }
     bool IsSpider()
     {
-        if (IsFingerCurled(OVRSkeleton.BoneId.Hand_Thumb1, OVRSkeleton.BoneId.Hand_Thumb2, OVRSkeleton.BoneId.Hand_Thumb3) &&
-           !IsFingerCurled(OVRSkeleton.BoneId.Hand_Index1, OVRSkeleton.BoneId.Hand_Index2, OVRSkeleton.BoneId.Hand_Index3) &&
-           IsFingerCurled(OVRSkeleton.BoneId.Hand_Middle1, OVRSkeleton.BoneId.Hand_Middle2, OVRSkeleton.BoneId.Hand_Middle3) &&
-           IsFingerCurled(OVRSkeleton.BoneId.Hand_Ring1, OVRSkeleton.BoneId.Hand_Ring2, OVRSkeleton.BoneId.Hand_Ring3) &&
-           !IsFingerCurled(OVRSkeleton.BoneId.Hand_Pinky1, OVRSkeleton.BoneId.Hand_Pinky2, OVRSkeleton.BoneId.Hand_Pinky3))
+        if (!IsFingerCurled(OVRSkeleton.BoneId.XRHand_ThumbProximal, OVRSkeleton.BoneId.XRHand_ThumbDistal, OVRSkeleton.BoneId.XRHand_ThumbTip) &&
+            !IsFingerCurled(OVRSkeleton.BoneId.XRHand_IndexProximal, OVRSkeleton.BoneId.XRHand_IndexIntermediate, OVRSkeleton.BoneId.XRHand_IndexDistal) &&
+            IsFingerCurled(OVRSkeleton.BoneId.XRHand_MiddleProximal, OVRSkeleton.BoneId.XRHand_MiddleIntermediate, OVRSkeleton.BoneId.XRHand_MiddleDistal) &&
+            IsFingerCurled(OVRSkeleton.BoneId.XRHand_RingProximal, OVRSkeleton.BoneId.XRHand_RingIntermediate, OVRSkeleton.BoneId.XRHand_RingDistal) &&
+            !IsFingerCurled(OVRSkeleton.BoneId.XRHand_LittleProximal, OVRSkeleton.BoneId.XRHand_LittleIntermediate, OVRSkeleton.BoneId.XRHand_LittleDistal))
         {
             return true;
         }
@@ -201,11 +189,11 @@ public class Hands : MonoBehaviour
     }
     bool IsEight()
     {
-        if (!IsFingerCurled(OVRSkeleton.BoneId.Hand_Thumb1, OVRSkeleton.BoneId.Hand_Thumb2, OVRSkeleton.BoneId.Hand_Thumb3) &&
-           !IsFingerCurled(OVRSkeleton.BoneId.Hand_Index1, OVRSkeleton.BoneId.Hand_Index2, OVRSkeleton.BoneId.Hand_Index3) &&
-           !IsFingerCurled(OVRSkeleton.BoneId.Hand_Middle1, OVRSkeleton.BoneId.Hand_Middle2, OVRSkeleton.BoneId.Hand_Middle3) &&
-           IsFingerCurled(OVRSkeleton.BoneId.Hand_Ring1, OVRSkeleton.BoneId.Hand_Ring2, OVRSkeleton.BoneId.Hand_Ring3) &&
-           IsFingerCurled(OVRSkeleton.BoneId.Hand_Pinky1, OVRSkeleton.BoneId.Hand_Pinky2, OVRSkeleton.BoneId.Hand_Pinky3))
+        if (!IsFingerCurled(OVRSkeleton.BoneId.XRHand_ThumbProximal, OVRSkeleton.BoneId.XRHand_ThumbDistal, OVRSkeleton.BoneId.XRHand_ThumbTip) &&
+            !IsFingerCurled(OVRSkeleton.BoneId.XRHand_IndexProximal, OVRSkeleton.BoneId.XRHand_IndexIntermediate, OVRSkeleton.BoneId.XRHand_IndexDistal) &&
+            !IsFingerCurled(OVRSkeleton.BoneId.XRHand_MiddleProximal, OVRSkeleton.BoneId.XRHand_MiddleIntermediate, OVRSkeleton.BoneId.XRHand_MiddleDistal) &&
+            IsFingerCurled(OVRSkeleton.BoneId.XRHand_RingProximal, OVRSkeleton.BoneId.XRHand_RingIntermediate, OVRSkeleton.BoneId.XRHand_RingDistal) &&
+            IsFingerCurled(OVRSkeleton.BoneId.XRHand_LittleProximal, OVRSkeleton.BoneId.XRHand_LittleIntermediate, OVRSkeleton.BoneId.XRHand_LittleDistal))
         {
             return true;
         }
@@ -213,11 +201,11 @@ public class Hands : MonoBehaviour
     }
     bool IsSix()
     {
-        if (!IsFingerCurled(OVRSkeleton.BoneId.Hand_Thumb1, OVRSkeleton.BoneId.Hand_Thumb2, OVRSkeleton.BoneId.Hand_Thumb3) &&
-           IsFingerCurled(OVRSkeleton.BoneId.Hand_Index1, OVRSkeleton.BoneId.Hand_Index2, OVRSkeleton.BoneId.Hand_Index3) &&
-           IsFingerCurled(OVRSkeleton.BoneId.Hand_Middle1, OVRSkeleton.BoneId.Hand_Middle2, OVRSkeleton.BoneId.Hand_Middle3) &&
-           IsFingerCurled(OVRSkeleton.BoneId.Hand_Ring1, OVRSkeleton.BoneId.Hand_Ring2, OVRSkeleton.BoneId.Hand_Ring3) &&
-           !IsFingerCurled(OVRSkeleton.BoneId.Hand_Pinky1, OVRSkeleton.BoneId.Hand_Pinky2, OVRSkeleton.BoneId.Hand_Pinky3))
+        if (!IsFingerCurled(OVRSkeleton.BoneId.XRHand_ThumbProximal, OVRSkeleton.BoneId.XRHand_ThumbDistal, OVRSkeleton.BoneId.XRHand_ThumbTip) &&
+            IsFingerCurled(OVRSkeleton.BoneId.XRHand_IndexProximal, OVRSkeleton.BoneId.XRHand_IndexIntermediate, OVRSkeleton.BoneId.XRHand_IndexDistal) &&
+            IsFingerCurled(OVRSkeleton.BoneId.XRHand_MiddleProximal, OVRSkeleton.BoneId.XRHand_MiddleIntermediate, OVRSkeleton.BoneId.XRHand_MiddleDistal) &&
+            IsFingerCurled(OVRSkeleton.BoneId.XRHand_RingProximal, OVRSkeleton.BoneId.XRHand_RingIntermediate, OVRSkeleton.BoneId.XRHand_RingDistal) &&
+            !IsFingerCurled(OVRSkeleton.BoneId.XRHand_LittleProximal, OVRSkeleton.BoneId.XRHand_LittleIntermediate, OVRSkeleton.BoneId.XRHand_LittleDistal))
         {
             return true;
         }
@@ -278,6 +266,8 @@ public class Hands : MonoBehaviour
         Vector3 dir1 = (intermediate.position - proximal.position).normalized;
         // 計算第二段骨頭的方向向量
         Vector3 dir2 = (distal.position - intermediate.position).normalized;
+        Debug.DrawRay(proximal.position, dir1 * 0.05f, Color.green);       // 第一段（近端 -> 中端）：綠色
+        Debug.DrawRay(intermediate.position, dir2 * 0.05f, Color.red);     // 第二段（中端 -> 遠端）：紅色
 
         // 計算這兩個向量之間的夾角
         float angle = Vector3.Angle(dir1, dir2);
