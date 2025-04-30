@@ -129,4 +129,9 @@ public class FavorSystem : MonoBehaviour
         //開放使用對應貓窩
     }
 
+    public int GetAdopt(string catname)
+    {
+        return adoptDict[catname];
+    }
+
 }

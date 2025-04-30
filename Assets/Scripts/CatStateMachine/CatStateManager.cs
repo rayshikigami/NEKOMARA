@@ -21,9 +21,9 @@ public abstract class CatStateBase
             if(!cat.sleeping && !cat.sitting ) // 如果貓咪沒有睡覺，並且貓咪沒有坐下
             {
                 if( cat.IsUserVisible()){
-                    if(Time.time - cat.getLastSeeUserTime() > 10f){
+                    if(Time.time - cat.getLastSeeUserTime() > 0f){
                         cat.setLastSeeUserTime();
-                        if(cat.wantFollow() || true){
+                        if(cat.wantFollow()){
                             cat.ChangeState(new CatFollowState(cat)); // 轉換到跟隨狀態
                             cat.isFollowing = true; // Set the following flag to true
                         }else if(cat.wantFlee()){
@@ -56,7 +56,7 @@ public class CatIdleState : CatStateBase // 閒置狀態
     public CatIdleState(CatStateManager cat) : base(cat) { }
     private float idleDuration = 0f; 
 
-    private float[] stateProbabilities = { 10f, 0f, 0, 0f, 0f, 0f}; // 機率 array
+    private float[] stateProbabilities = { 1f, 0f, 0f, 0f, 1f, 1f}; // 機率 array
 
     public override void Enter()
     {
@@ -260,7 +260,7 @@ public class CatMoveToObjectState : CatStateBase // 移動到物件狀態
             offset.y = 0; // Set y to 0 to ignore height difference
            
             // if offset > 1f, then set the target position to be in front of the target
-            if (offset.magnitude > 1f)
+            if (offset.magnitude > ds * 1.3f)
             {
                 offset.y = 0; // Set y to 0 to ignore height difference
                 offset.Normalize(); // Normalize the direction vector
@@ -322,7 +322,9 @@ public class CatEatState : CatStateBase // 吃東西狀態 -> completed
             cat.hungerSystem.AddHunger(cat.catName,50); // Add hunger points when eating
             // plat random eat sound
             cat.audioSource.PlayOneShot(cat.eatClips[Random.Range(0, cat.eatClips.Length)]);
-            if(cat.favorateFood == foodType){
+            cat.love.SetActive(true);
+            cat.loveTime = Time.time;
+            if (cat.favorateFood == foodType){
                 cat.favorSystem.AddFavor(cat.catName, 10); // Increase favor points when eating favorite food
                 cat.achieveSystem.UpdateProgress("favor_up", 10);
             }else{
@@ -346,6 +348,10 @@ public class CatEatState : CatStateBase // 吃東西狀態 -> completed
             if(foodType == 0)
             {
                 catBowlScript.isFull = false; // Set the food bowl to not full after eating
+            }
+            else
+            {
+                food.GetComponent<CatFood>().BeEaten();
             }
             return;
         }
@@ -549,7 +555,8 @@ public class CatFollowState : CatStateBase // 跟隨狀態 -> 等手勢偵測 !!
     public override void Enter()
     {
         Debug.Log("now is following");
-        cat.animator.Play("walk");
+        cat.animator.CrossFade("walk", 0.4f);
+        cat.currentAnimation = CatStateManager.currentCatAnimation.walk;
         lastTimeSeeUser = Time.time;
     }
     
@@ -582,6 +589,7 @@ public class CatFollowState : CatStateBase // 跟隨狀態 -> 等手勢偵測 !!
             
         }
         CatTeaser catTeaser = Object.FindObjectOfType<CatTeaser>();
+        //Debug.Log(cat.lefthand.gestureType);
         if (catTeaser != null && catTeaser.teasing)
         {
             cat.sitting = false;
@@ -590,28 +598,54 @@ public class CatFollowState : CatStateBase // 跟隨狀態 -> 等手勢偵測 !!
         }
         if( cat.IsUserVisible() ){
             lastTimeSeeUser = Time.time;
-            if(cat.lefthand.gestureType == Hands.catGestureType.PlayDead  || cat.righthand.gestureType == Hands.catGestureType.PlayDead){
-                cat.ChangeState(new CatPlayDeadState(cat));
-                return;
-            }else if(cat.lefthand.gestureType == Hands.catGestureType.BackFlip || cat.righthand.gestureType == Hands.catGestureType.BackFlip){
-                cat.ChangeState(new CatBackflipState(cat)); // Transition to pet state
-                return;
-            }else if(cat.lefthand.gestureType == Hands.catGestureType.Stand || cat.righthand.gestureType == Hands.catGestureType.Stand){
+        }
+        if (cat.lefthand.gestureType == Hands.catGestureType.Leave || cat.righthand.gestureType == Hands.catGestureType.Leave)
+        {
+            cat.lefthand.gestureType = Hands.catGestureType.Normal;
+            cat.righthand.gestureType = Hands.catGestureType.Normal;
+            cat.sitting = false;
+            cat.isFollowing = false;
+            cat.ChangeState(new CatIdleState(cat)); // Transition to flee state 
+            return;
+        }
+        if(cat.favorSystem.GetAdopt(cat.catName) == 1)
+        {
+            if (Time.time - cat.stateEnterTime > 3.5f)
+            {
+                if (cat.lefthand.gestureType == Hands.catGestureType.PlayDead || cat.righthand.gestureType == Hands.catGestureType.PlayDead)
+                {
+                    Debug.Log("GET PLAYDEAD GESTURE");
+                    cat.lefthand.gestureType = Hands.catGestureType.Normal;
+                    cat.righthand.gestureType = Hands.catGestureType.Normal;
+                    cat.ChangeState(new CatPlayDeadState(cat));
+                    return;
+                }
+                else if (cat.lefthand.gestureType == Hands.catGestureType.BackFlip || cat.righthand.gestureType == Hands.catGestureType.BackFlip)
+                {
+                    cat.lefthand.gestureType = Hands.catGestureType.Normal;
+                    cat.righthand.gestureType = Hands.catGestureType.Normal;
+                    cat.ChangeState(new CatBackflipState(cat)); // Transition to pet state
+                    return;
+                }
+
+            }
+            if (cat.lefthand.gestureType == Hands.catGestureType.Stand || cat.righthand.gestureType == Hands.catGestureType.Stand)
+            {
+                cat.lefthand.gestureType = Hands.catGestureType.Normal;
+                cat.righthand.gestureType = Hands.catGestureType.Normal;
                 cat.ChangeState(new CatStandUpState(cat)); // Transition to flee state
                 return;
-            }else if(cat.lefthand.gestureType == Hands.catGestureType.Sit || cat.righthand.gestureType == Hands.catGestureType.Sit){
+            }
+            else if (cat.lefthand.gestureType == Hands.catGestureType.Sit || cat.righthand.gestureType == Hands.catGestureType.Sit)
+            {
+                cat.lefthand.gestureType = Hands.catGestureType.Normal;
+                cat.righthand.gestureType = Hands.catGestureType.Normal;
                 cat.ChangeState(new CatSitDownState(cat)); // Transition to sit state
-                return;
-            }else if(cat.lefthand.gestureType == Hands.catGestureType.Leave || cat.righthand.gestureType == Hands.catGestureType.Leave){
-                cat.sitting = false;
-                cat.isFollowing = false;
-                cat.ChangeState(new CatIdleState(cat)); // Transition to flee state 
                 return;
             }
         }
-
-
-        if( Time.time - cat.stateEnterTime  > 10f ){
+        
+        if ( Time.time - cat.stateEnterTime  > 10f ){
             cat.sitting = false;
             cat.isFollowing = false;
             cat.ChangeState(new CatAttackUserState(cat));
@@ -632,6 +666,7 @@ public class CatAttackUserState : CatStateBase // 攻擊玩家狀態 -> complete
 
     public override void Enter()
     {
+        Debug.Log("cat is now attack user");
         cat.animator.Play("punch");
 
         cat.AttackUser();
@@ -675,9 +710,11 @@ public class CatPetState : CatStateBase // 撫摸狀態 ->  !!!
     public override void Enter()
     {
         cat.achieveSystem.UpdateProgress("touch", 1);
+        cat.love.SetActive(true);
+        cat.loveTime = Time.time;
         cat.favorSystem.AddFavor(cat.catName, 5); // Decrease favor points when fleeing
         cat.achieveSystem.UpdateProgress("favor_up",5);
-        cat.animator.CrossFade("sitting", 0.25f);
+        cat.animator.CrossFade("petted", 0.25f);
         cat.audioSource.PlayOneShot(cat.sleepClips[Random.Range(0, cat.sleepClips.Length)]);
     }
 
@@ -700,6 +737,8 @@ public class CatFleeState : CatStateBase // 逃跑狀態 -> completed
 
     public override void Enter()
     {
+
+        Debug.Log("cat is now flee");
         cat.favorSystem.AddFavor(cat.catName, -1); // Decrease favor points when fleeing
         cat.achieveSystem.UpdateProgress("favor_down",1);
         cat.RunAwayFromUser();
@@ -714,7 +753,7 @@ public class CatFleeState : CatStateBase // 逃跑狀態 -> completed
         if (cat.HasReachedDestination())
         {
             cat.ChangeState(new CatIdleState(cat)); // Transition to idle state after fleeing
-            cat.agent.speed = 0.5f; // Reset speed after fleeing
+            cat.agent.speed = 0.35f; // Reset speed after fleeing
         }
     }
     public override void Exit()
@@ -822,6 +861,8 @@ public class CatPlayDeadState : CatStateBase // 裝死狀態 -> completed !!!
 
     public override void Enter()
     {
+
+        Debug.Log("cat is now playdead");
         cat.animator.Play("playdead");
     }
 
@@ -843,7 +884,9 @@ public class CatBackflipState : CatStateBase // 後空翻狀態 -> completed !!!
 
     public override void Enter()
     {
-        cat.animator.Play("Backflip");
+
+        Debug.Log("cat is now Backflip");
+        cat.animator.Play("backflip");
     }
 
     public override void Update()
@@ -869,7 +912,8 @@ public class CatSitDownState : CatStateBase // 坐下狀態 -> completed !!!
             return;
         }
         cat.sitting = true;
-        cat.animator.Play("sitting");
+        cat.animator.CrossFade("sitting", 0.3f);
+        Debug.Log("cat is now sitting");
     }
 
     public override void Update()
@@ -892,7 +936,8 @@ public class CatStandUpState : CatStateBase // 起立狀態 -> completed !!!
             cat.ChangeState(new CatFollowState(cat)); // Transition to idle state after attack
             return;
         }
-        cat.animator.Play("standing");
+        cat.animator.CrossFade("standing", 0.3f);
+        Debug.Log("cat is now standing");
     }
 
     public override void Update()
@@ -942,7 +987,7 @@ public class CatPlayWithCatTowerState : CatStateBase // 玩玩具狀態 > > comp
         yield return RotateBy180(1.2f);
         
         cat.sitting = true; // Set the sitting flag to true
-        float stayDuration = Random.Range(2f, 3.5f);
+        float stayDuration = Random.Range(3f, 30f);
         Debug.Log("Staying on cat tower top for " + stayDuration + " seconds.");
         cat.animator.CrossFade("sitting", 0.5f);
         // 停留 2~5 秒
@@ -1067,6 +1112,8 @@ public class CatStateManager : MonoBehaviour
     private float lastSeeOtherCatTime ; // Duration of the current state
     public Hands lefthand; // Reference to the hands object
     public Hands righthand;
+    public GameObject love;
+    public float loveTime;
     public enum currentCatAnimation
     {
         idle,
@@ -1075,13 +1122,15 @@ public class CatStateManager : MonoBehaviour
     }
     public currentCatAnimation currentAnimation = currentCatAnimation.idle;
     void Start()
-    {   
+    {
+        love.SetActive(false);
+        agent.speed = 0.35f;
         transform.position = user.transform.position ; // Set the initial position of the cat to the user's position
         if (UnityEngine.AI.NavMesh.SamplePosition(transform.position, out UnityEngine.AI.NavMeshHit hit, 2f, UnityEngine.AI.NavMesh.AllAreas))
         {
             agent.Warp(hit.position);  
             // change agent speed to 0.5f
-            agent.speed = 0.35f;
+            
         }
         // catch catSkeleton
         
@@ -1164,6 +1213,10 @@ public class CatStateManager : MonoBehaviour
 
     void Update()
     {
+        if (Time.time - loveTime > 1f)
+        {
+            love.SetActive(false);
+        }
         currentState?.OnUpdate();
         // 每隔一段時間隨機叫一次
         if (Time.time > nextMeowTime )
@@ -1297,7 +1350,8 @@ public class CatStateManager : MonoBehaviour
         }
         return false;
     }
-    public bool wantFlee() { 
+    public bool wantFlee() {
+        return false;
         float x = Random.Range(0f, 1f); // 隨機生成一個 0~1 的數字
         float y = this.favorSystem.GetFavor(this.catName)/10f;
         if (x * y < personality * personality * 0.5)
@@ -1308,34 +1362,29 @@ public class CatStateManager : MonoBehaviour
     }
     public void LookAtUser()
     {
-        if (user == null || headBone == null)
+        Vector3 targetPosition = user.transform.position;
+        Vector3 offset = targetPosition - this.transform.position;
+        offset.y = 0; // Set y to 0 to ignore height difference
+        offset.Normalize(); // Normalize the direction vector
+        float angle = Vector3.SignedAngle(this.transform.forward, offset, Vector3.up);
+        //Debug.Log("angle: "+Mathf.Abs(angle));
+        if (HasReachedDestination() && Mathf.Abs(angle) > 30f)
         {
-            Debug.LogWarning("User or head bone not set. Cannot look at user.");
-            return;
+            // Rotate the cat to face the target
+            this.transform.rotation = Quaternion.RotateTowards(this.transform.rotation, Quaternion.LookRotation(offset), 360 * Time.deltaTime);
         }
-
-        // 計算貓頭到使用者的向量
-        Vector3 directionToUser = user.transform.position - headBone.position;
-        Quaternion targetRotation = Quaternion.LookRotation(directionToUser);
-
-        // 限制角度：與貓的整體朝向相比
-        float angle = Quaternion.Angle(transform.rotation, targetRotation);
-        if (angle > maxHeadTurnAngle)
-        {
-            // 對整體方向限制角度，再從貓身體轉到限制後的目標角度
-            targetRotation = Quaternion.RotateTowards(transform.rotation, targetRotation, maxHeadTurnAngle);
-        }
-
-        // 立即設置旋轉
-        headBone.rotation = targetRotation;
+        
     }
 
     public void FollowUser() { 
         if (user != null)
         {
-            Vector3 direction = (user.transform.position - transform.position).normalized;
+            Vector3 direction = user.transform.position - transform.position; 
+            direction.y = 0f;
+            if (Mathf.Abs(direction.magnitude - 0.5f) < 0.25f) return;
+            direction.Normalize();
             Vector3 targetPosition = user.transform.position - direction * 0.5f;
-            if (UnityEngine.AI.NavMesh.SamplePosition(targetPosition, out UnityEngine.AI.NavMeshHit hit, 1f, UnityEngine.AI.NavMesh.AllAreas))
+            if (UnityEngine.AI.NavMesh.SamplePosition(targetPosition, out UnityEngine.AI.NavMeshHit hit, 5f, UnityEngine.AI.NavMesh.AllAreas))
             {
                 agent.SetDestination(hit.position);
             }
@@ -1367,10 +1416,8 @@ public class CatStateManager : MonoBehaviour
             if (UnityEngine.AI.NavMesh.SamplePosition(targetPosition, out UnityEngine.AI.NavMeshHit hit, 5f, UnityEngine.AI.NavMesh.AllAreas))
             {
                 float distance = (hit.position - transform.position).magnitude;
-                if (distance < 0.02f)
+                if (distance < 0.075f && (targetPosition - transform.position).y > 0.6f)
                 {
-                    this.favorSystem.AddFavor(this.catName, 3);
-                    this.achieveSystem.UpdateProgress("favor_up", 3);
 
                     // 停止 NavMeshAgent
                     this.SetJumpable(true);
@@ -1416,6 +1463,13 @@ public class CatStateManager : MonoBehaviour
         while (elapsed < duration)
         {
             float t = elapsed / duration;
+            if (t > 0.5f) {
+                this.favorSystem.AddFavor(this.catName, 3);
+                this.achieveSystem.UpdateProgress("favor_up", 3);
+                love.SetActive(true);
+                loveTime = Time.time;
+            }
+            
             // 使用拋物線軌跡
             Vector3 position = Vector3.Lerp(start, targetPos, t);
             position.y += jumpHeight * Mathf.Sin(Mathf.PI * t); // 拋物線
@@ -1456,7 +1510,9 @@ public class CatStateManager : MonoBehaviour
             List<CatFood> Foods = new List<CatFood>();
             foreach (var food in allFoods)
             {
-                if (food.foodType != 0)
+                if (food.foodType != 0 &&
+                    food.gameObject.scene.IsValid() &&
+                    food.gameObject.activeInHierarchy)
                 {
                     Foods.Add(food);
                 }
@@ -1480,7 +1536,9 @@ public class CatStateManager : MonoBehaviour
             List<CatFood> favorFoods = new List<CatFood>();
             foreach (var food in allFoods)
             {
-                if (food.foodType == this.favorateFood)
+                if (food.foodType == this.favorateFood &&
+                    food.gameObject.scene.IsValid() &&
+                    food.gameObject.activeInHierarchy)
                 {
                     favorFoods.Add(food);
                 }
@@ -1494,28 +1552,54 @@ public class CatStateManager : MonoBehaviour
         return null;
     }
     // find box position
-    public GameObject FindBox() { 
-        // find the box position in the scene, and return the position
+    public GameObject FindBox()
+    {
         var boxes = Resources.FindObjectsOfTypeAll<Box>();
-        int length = boxes.Length;
-        if (length > 0)
+
+        List<Box> validBoxes = new List<Box>();
+
+        foreach (var box in boxes)
         {
-            return boxes[Random.Range(0, length)].gameObject;
+            if (box.gameObject.scene.IsValid() && box.gameObject.activeInHierarchy)
+            {
+                validBoxes.Add(box);
+            }
         }
-        Debug.Log("No box found in the scene.");
+
+        int count = validBoxes.Count;
+
+        if (count > 0)
+        {
+            return validBoxes[Random.Range(0, count)].gameObject;
+        }
+
+        Debug.Log("No active box found in the scene.");
         return null;
     }
 
-     public GameObject FindCatTower() { 
-        // find the object with script cat Tower
+    public GameObject FindCatTower()
+    {
         var allCTs = Resources.FindObjectsOfTypeAll<CatTower>();
-        int length = allCTs.Length;
-        if (length > 0)
+        List<CatTower> activeCTs = new List<CatTower>();
+
+        foreach (var ct in allCTs)
         {
-            return allCTs[Random.Range(0, length)].gameObject;
+            if (ct.gameObject.scene.IsValid() && ct.gameObject.activeInHierarchy)
+            {
+                activeCTs.Add(ct);
+            }
         }
+
+        int count = activeCTs.Count;
+        if (count > 0)
+        {
+            return activeCTs[Random.Range(0, count)].gameObject;
+        }
+
+        Debug.Log("No active CatTower found in the scene.");
         return null;
     }
+
     public int getRandomStateNumber( float[] stateProbabilities){
         float totalProbability = 0f;
         foreach (float probability in stateProbabilities)

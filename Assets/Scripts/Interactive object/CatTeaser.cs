@@ -27,7 +27,11 @@ public class CatTeaser : MonoBehaviour
         float movement = (transform.position - lastPosition).magnitude;
         float rotationDelta = Quaternion.Angle(transform.rotation, lastRotation);
 
-
+        if(transform.position.y<-100)
+        {
+            timer = 5;
+            teasing = false;
+        }
         if (movement > positionThreshold || rotationDelta > rotationThreshold)
         {
             Debug.Log("shake");

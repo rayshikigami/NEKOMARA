@@ -104,6 +104,8 @@ public class HungerSystem : MonoBehaviour
     public void AddHunger(string catname, int count)
     {
         hungerDict[catname] += count;
+        hungerDict[catname] = Mathf.Min(hungerDict[catname], 100);
+        hungerDict[catname] = Mathf.Max(hungerDict[catname], 0);
         Savehunger("hunger.csv");
     }
 

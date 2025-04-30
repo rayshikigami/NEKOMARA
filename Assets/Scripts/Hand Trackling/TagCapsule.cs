@@ -8,43 +8,28 @@ public class TagCapsule : MonoBehaviour
 
     void Start()
     {
-        if (skeleton == null)
-            skeleton = GetComponent<OVRSkeleton>();
-
-        if (skeleton == null)
+        // 找到 "Capsules" 子物件
+        Transform capsulesRoot = transform.Find("Capsules");
+        if (capsulesRoot == null)
         {
-            Debug.LogError("找不到 OVRSkeleton 元件！");
+            Debug.LogError("找不到 Capsules 物件！");
             return;
         }
 
-        if (!skeleton.IsInitialized)
-        {
-            // 等骨架初始化完成再處理
-            StartCoroutine(DelayedTagging());
-        }
-        else
-        {
-            TagAllCapsules();
-        }
-    }
+        int count = 0;
 
-    IEnumerator DelayedTagging()
-    {
-        yield return new WaitForSeconds(1f); // 等骨架初始化完成
-        TagAllCapsules();
-    }
-
-    void TagAllCapsules()
-    {
-        foreach (var bone in skeleton.Bones)
+        // 遞迴所有子物件
+        foreach (Transform child in capsulesRoot.GetComponentsInChildren<Transform>(true))
         {
-            Debug.LogError("BONE!!!!!!");
-            CapsuleCollider capsule = bone.Transform.GetComponent<CapsuleCollider>();
-            if (capsule != null)
+            child.gameObject.tag = "Hand";
+            CapsuleCollider col = child.GetComponent<CapsuleCollider>();
+            if (col != null)
             {
-                capsule.gameObject.tag = "Hand";
-                Debug.LogError($"已設定 Tag 'Hand' 給：{bone.Id}");
+                child.gameObject.tag = "Hand";
+                count++;
             }
         }
+
+        Debug.Log($"共標記 {count} 個帶有 CapsuleCollider 的物件為 Hand");
     }
 }

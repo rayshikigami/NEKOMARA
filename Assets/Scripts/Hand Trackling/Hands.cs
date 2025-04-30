@@ -95,21 +95,21 @@ public class Hands : MonoBehaviour
             {
                 print("Gun");
                 state = STATE.GUN;
-                gestureType = catGestureType.Normal;
+                //gestureType = catGestureType.Normal;
             }
 
             else if (IsZero())
             {
                 print("zero");
                 state = STATE.ZERO;
-                gestureType = catGestureType.Normal;
+                //gestureType = catGestureType.Normal;
             }
 
             else if (IsOne())
             {
                 print("one");
                 state = STATE.ONE;
-                gestureType = catGestureType.Normal;
+                //gestureType = catGestureType.Normal;
             }
 
             else if (IsSpider())
@@ -135,7 +135,7 @@ public class Hands : MonoBehaviour
                 state = STATE.NORMAL;
                 gestureType = catGestureType.PlayDead;
             }
-            if (!IsGun())
+            else if (!IsGun())
             {
                 print("back to normal");
                 state = STATE.NORMAL;
@@ -172,9 +172,10 @@ public class Hands : MonoBehaviour
             {
                 print("back to normal");
                 state = STATE.NORMAL;
-                gestureType = catGestureType.Normal;
+                //gestureType = catGestureType.Normal;
             }
         }
+
 
 
     }

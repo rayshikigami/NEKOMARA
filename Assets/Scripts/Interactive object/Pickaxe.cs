@@ -28,6 +28,8 @@ public class Pickaxe : MonoBehaviour
         if (collision.gameObject.CompareTag("catTeaser"))
         {
             print("break the teaser");
+            collision.gameObject.GetComponent<CatTeaser>().teasing = false;
+            collision.gameObject.GetComponent<Rigidbody>().velocity = Vector3.zero;
             collision.gameObject.SetActive(false);
             GetComponent<AudioSource>().Play();
         }
