@@ -38,7 +38,26 @@ public class Hands : MonoBehaviour
     void Update()
     {
         //========================================================================================================================================
-
+        //if (IsFingerCurled(OVRSkeleton.BoneId.XRHand_ThumbProximal, OVRSkeleton.BoneId.XRHand_ThumbDistal, OVRSkeleton.BoneId.XRHand_ThumbTip))
+        //{
+        //    print("THUMB彎曲");
+        //}
+        //if (IsFingerCurled(OVRSkeleton.BoneId.XRHand_IndexProximal, OVRSkeleton.BoneId.XRHand_IndexIntermediate, OVRSkeleton.BoneId.XRHand_IndexDistal))
+        //{
+        //    print("INDEX彎曲");
+        //}
+        //if (IsFingerCurled(OVRSkeleton.BoneId.XRHand_MiddleProximal, OVRSkeleton.BoneId.XRHand_MiddleIntermediate, OVRSkeleton.BoneId.XRHand_MiddleDistal))
+        //{
+        //    print("MIDDLE彎曲");
+        //}
+        //if (IsFingerCurled(OVRSkeleton.BoneId.XRHand_RingProximal, OVRSkeleton.BoneId.XRHand_RingIntermediate, OVRSkeleton.BoneId.XRHand_RingDistal))
+        //{
+        //    print("RING彎曲");
+        //}
+        //if (IsFingerCurled(OVRSkeleton.BoneId.XRHand_LittleProximal, OVRSkeleton.BoneId.XRHand_LittleIntermediate, OVRSkeleton.BoneId.XRHand_LittleDistal))
+        //{
+        //    print("PINKY彎曲");
+        //}
         //========================================================================================================================================
 
         //if (IsGun())

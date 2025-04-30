@@ -548,6 +548,7 @@ public class CatFollowState : CatStateBase // 跟隨狀態 -> 等手勢偵測 !!
     
     public override void Enter()
     {
+        Debug.Log("now is following");
         cat.animator.Play("walk");
         lastTimeSeeUser = Time.time;
     }
@@ -603,6 +604,7 @@ public class CatFollowState : CatStateBase // 跟隨狀態 -> 等手勢偵測 !!
                 return;
             }else if(cat.lefthand.gestureType == Hands.catGestureType.Leave || cat.righthand.gestureType == Hands.catGestureType.Leave){
                 cat.sitting = false;
+                cat.isFollowing = false;
                 cat.ChangeState(new CatIdleState(cat)); // Transition to flee state 
                 return;
             }
@@ -611,10 +613,12 @@ public class CatFollowState : CatStateBase // 跟隨狀態 -> 等手勢偵測 !!
 
         if( Time.time - cat.stateEnterTime  > 10f ){
             cat.sitting = false;
+            cat.isFollowing = false;
             cat.ChangeState(new CatAttackUserState(cat));
             return;
         }
         if( Time.time - lastTimeSeeUser > 10f ){
+            cat.isFollowing = false;
             cat.sitting = false;
             cat.ChangeState(new CatIdleState(cat)); // Transition to idle state after not seeing user for a while
             return;
