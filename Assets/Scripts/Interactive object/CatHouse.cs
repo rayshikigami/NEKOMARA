@@ -112,8 +112,11 @@ public class CatHouse : MonoBehaviour
 
     public void breakTheHouse()
     {
-        Instantiate(smokeParticle, catForThisHouse.transform.position, catForThisHouse.transform.rotation);
-        catForThisHouse.SetActive(false);
+        if (catForThisHouse != null)
+        {
+            Instantiate(smokeParticle, catForThisHouse.transform.position, catForThisHouse.transform.rotation);
+            catForThisHouse.SetActive(false);
+        }
         OnTheFloor = false;
         isSummon = false;
         timer = 3;
