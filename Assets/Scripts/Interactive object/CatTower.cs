@@ -67,7 +67,6 @@ public class CatTower : MonoBehaviour
             //更改貓的狀態 變成可跳躍
 
             // get other.GetComponent<CatStateManager>()
-            other.GetComponent<CatStateManager>().SetJumpable(true);
 
         }
     }
@@ -77,7 +76,6 @@ public class CatTower : MonoBehaviour
         if (isSet && other.CompareTag("cat"))
         {
             //更改貓的狀態變成 不可跳躍
-            other.GetComponent<CatStateManager>().SetJumpable(false);
         }
     }
 

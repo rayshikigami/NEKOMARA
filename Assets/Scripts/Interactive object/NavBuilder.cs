@@ -42,16 +42,16 @@ public class NavBuilder : MonoBehaviour
         yield return new WaitForSeconds(1.0f); // 等建完
         AutoLinkAnchors();
         yield return new WaitForSeconds(1.0f); // 等建完
-        var allCats = Resources.FindObjectsOfTypeAll<CatStateManager>();
-        foreach (var cat in allCats)
-        {
-            if (cat.CompareTag("cat"))
-            {
-                cat.gameObject.SetActive(true);
-                cat.transform.position = new Vector3(0, 0.5f, 0);
-                sn.Agents.Add(cat.GetComponent<NavMeshAgent>());
-            }
-        }
+        //var allCats = Resources.FindObjectsOfTypeAll<CatStateManager>();
+        //foreach (var cat in allCats)
+        //{
+        //    if (cat.CompareTag("cat"))
+        //    {
+        //        cat.gameObject.SetActive(true);
+        //        cat.transform.position = new Vector3(0, 0.5f, 0);
+        //        sn.Agents.Add(cat.GetComponent<NavMeshAgent>());
+        //    }
+        //}
         sn.BuildSceneNavMesh();
 
     }

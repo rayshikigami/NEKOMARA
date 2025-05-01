@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using System;
+using Meta.XR.MRUtilityKit;
+using UnityEngine.AI;
 
 public class CatHouse : MonoBehaviour
 {
@@ -16,7 +18,7 @@ public class CatHouse : MonoBehaviour
     public GameObject grabInteractor;
     public GameObject catForThisHouse;
 
-    public int catID = -99;
+    public int catID = -99, ThisId;
 
     public GameObject smokeParticle;
     // Start is called before the first frame update
@@ -58,11 +60,17 @@ public class CatHouse : MonoBehaviour
                 GetComponent<resetPosition>().SetPosition();
                 GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezePosition | RigidbodyConstraints.FreezeRotation;
                 GetComponent<AudioSource>().Play();
+
                 if (catID == -99)
                 {
-                    catID = UnityEngine.Random.Range(0, 3);
+                    ThisId = UnityEngine.Random.Range(0, 3);
                 }
-                summon(catID);//要召喚的貓的id
+                else
+                {
+                    ThisId = catID;
+                }
+                
+                summon(ThisId);//要召喚的貓的id
             }
         }
     }
@@ -76,6 +84,8 @@ public class CatHouse : MonoBehaviour
         catForThisHouse.transform.position = transform.position + new Vector3(0, 0.3f, 0);
 
         Instantiate(smokeParticle, transform.position, transform.rotation);
+        FindObjectOfType<SceneNavigation>().Agents.Add(catForThisHouse.GetComponent<NavMeshAgent>());
+        FindObjectOfType<SceneNavigation>().BuildSceneNavMesh();
         //FindObjectOfType<NavBuilder>().BuildMap();
 
     }
@@ -107,6 +117,7 @@ public class CatHouse : MonoBehaviour
         OnTheFloor = false;
         isSummon = false;
         timer = 3;
+        GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
         grabInteractor.SetActive(true);
         //Destroy(catForThisHouse);//這邊之後要改成setActive(false);
     }

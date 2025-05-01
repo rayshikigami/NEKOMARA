@@ -16,10 +16,10 @@ public abstract class CatStateBase
     public virtual void Enter() { }
     public virtual void Update() { }
     public virtual void OnUpdate() {
-        if (cat.isPetting) {
+        if (!cat.sleeping && cat.isPetting) {
             this.Update();
             return; }
-        if (cat.isPetable() )
+        if (!cat.sleeping && cat.isPetable() )
         {
             Debug.Log("cat is petted.");
             cat.isPetting = true;
@@ -31,7 +31,7 @@ public abstract class CatStateBase
             if(!cat.sleeping && !cat.sitting ) // 如果貓咪沒有睡覺，並且貓咪沒有坐下
             {
                 if( cat.IsUserVisible()){
-                    if(Time.time - cat.getLastSeeUserTime() > 0f){
+                    if(Time.time - cat.getLastSeeUserTime() > 20f){
                         cat.setLastSeeUserTime();
                         if(cat.wantFollow()){
                             cat.ChangeState(new CatFollowState(cat)); // 轉換到跟隨狀態
@@ -45,8 +45,8 @@ public abstract class CatStateBase
                         this.Update();
                     }
                     
-                }else if(cat.othercat != null || (Time.time - cat.getLastSeeUserTime() > 30f && cat.IsOtherCatVisible())){
-                    cat.setLastSeeUserTime();
+                }else if(cat.othercat != null || (Time.time - cat.getLastSeeOtherCatTime() > 30f && cat.IsOtherCatVisible())){
+                    cat.setLastSeeOtherCatTime();
                     cat.ChangeState(new CatPlayWithOtherCatState(cat)); // 轉換到跟隨狀態
                 }else{
                     this.Update();
@@ -66,7 +66,7 @@ public class CatIdleState : CatStateBase // 閒置狀態
     public CatIdleState(CatStateManager cat) : base(cat) { }
     private float idleDuration = 0f; 
 
-    private float[] stateProbabilities = { 1f, 1f, 0f, 0f, 1f, 1f}; // 機率 array
+    private float[] stateProbabilities = { 30f, 1f, 0f, 5f, 2f, 2f}; // 機率 array
 
     public override void Enter()
     {
@@ -190,6 +190,11 @@ public class CatSleepState : CatStateBase // 睡覺狀態 -> completed? 缺少�
             // Play a random sleep sound
             cat.audioSource.PlayOneShot(cat.sleepClips[Random.Range(0, cat.sleepClips.Length)]);
         }
+    }
+
+    public override void Exit()
+    {
+        cat.audioSource.Stop();
     }
 }
 
@@ -1118,7 +1123,7 @@ public class CatStateManager : MonoBehaviour
     public AudioSource audioSource; // Reference to the AudioSource component
     public AudioClip[] meowClips; // Array of meow sound clips
     public AudioClip[] eatClips; // Array of purr sound clips
-    public AudioClip[] scratchClips; // Array of scratch sound clips
+    public AudioClip[] punchClips; // Array of scratch sound clips
     public AudioClip[] sleepClips; // Array of scratch sound clips
     public UnityEngine.AI.NavMeshAgent agent; // Reference to the NavMeshAgent for movement
     public GameObject catSkeleton; // Reference to the cat skeleton prefab
@@ -1141,8 +1146,11 @@ public class CatStateManager : MonoBehaviour
     public Hands righthand;
     public GameObject love;
     public float loveTime;
-    public float lastTimePet;
-    public float lastTimenotPet;
+    public GameObject adopt;
+    public float adoptTime;
+    public bool isAdopted;
+    private float lastTimePet;
+    private float lastTimenotPet;
     public enum currentCatAnimation
     {
         idle,
@@ -1152,6 +1160,8 @@ public class CatStateManager : MonoBehaviour
     public currentCatAnimation currentAnimation = currentCatAnimation.idle;
     void Start()
     {
+        isAdopted = favorSystem.GetAdopt(this.catName) == 1;
+        adopt.SetActive(false);
         love.SetActive(false);
         agent.speed = 0.35f;
         transform.position = user.transform.position ; // Set the initial position of the cat to the user's position
@@ -1242,21 +1252,35 @@ public class CatStateManager : MonoBehaviour
 
     void Update()
     {
-        if (Time.time - loveTime > 1f)
+        if (sleeping) nextMeowTime = Time.time + Random.Range(35f, 60f);
+        float curTime = Time.time;
+        if ((!isAdopted) && this.favorSystem.GetAdopt(this.catName) == 1)
+        {
+            isAdopted = true;
+            adoptTime = curTime;
+            adopt.SetActive(true);
+        }
+        if (isAdopted && curTime - adoptTime> 2f) {
+            adopt.SetActive(false);
+        }
+        if (curTime - loveTime > 1f)
         {
             love.SetActive(false);
         }
         currentState?.OnUpdate();
         // 每隔一段時間隨機叫一次
-        if (Time.time > nextMeowTime )
+        if (curTime > nextMeowTime )
         {
             int randomIndex = Random.Range(0, meowClips.Length);
             audioSource.PlayOneShot(meowClips[randomIndex]);
-            nextMeowTime = Time.time + Random.Range(20f, 30f); // Reset the timer after meowing
-            hungerSystem.AddHunger(catName, -Random.Range(5, 10)); // Decrease hunger points when meowing
+            nextMeowTime = curTime + Random.Range(20f, 30f); // Reset the timer after meowing
+            hungerSystem.AddHunger(catName, -Random.Range(3, 5)); // Decrease hunger points when meowing
+        }
+        if (curTime - lastTimePet > 0.2f)
+        {
+            lastTimenotPet = curTime;
         }
 
-        
     }
 
     void LateUpdate()
@@ -1273,10 +1297,7 @@ public class CatStateManager : MonoBehaviour
         if (this.isFollowing){
             this.LookAtUser();
         }
-        if( Time.time - lastTimePet > 0.15f)
-        {
-            lastTimenotPet = Time.time;
-        }
+        
     }
 
     void OnCollisionEnter(Collision collision)
@@ -1403,7 +1424,6 @@ public class CatStateManager : MonoBehaviour
         return false;
     }
     public bool wantFlee() {
-        return false;
         float x = Random.Range(0f, 1f); // 隨機生成一個 0~1 的數字
         float y = this.favorSystem.GetFavor(this.catName)/10f;
         if (x * y < personality * personality * 0.5)
@@ -1541,6 +1561,7 @@ public class CatStateManager : MonoBehaviour
     public void AttackUser() {
         if (user != null)
         {
+            this.audioSource.PlayOneShot(punchClips[0]);
             Vector3 targetPosition = user.transform.position;
             Vector3 direction = (targetPosition - transform.position);
             // check distance between cat and user is less than 0.2f
