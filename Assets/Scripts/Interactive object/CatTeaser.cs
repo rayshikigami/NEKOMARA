@@ -12,7 +12,7 @@ public class CatTeaser : MonoBehaviour
     public bool swinging = false;
     public GameObject target;
 
-    public float timer = 5, timer2 = 30;
+    public float timer = 3, timer2 = 30;
 
     public bool teasing = false;
     void Start()
