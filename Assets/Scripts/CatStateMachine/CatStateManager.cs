@@ -1426,7 +1426,7 @@ public class CatStateManager : MonoBehaviour
     public bool wantFlee() {
         float x = Random.Range(0f, 1f); // 隨機生成一個 0~1 的數字
         float y = this.favorSystem.GetFavor(this.catName)/10f;
-        if (x * y < personality * personality * 0.5)
+        if (x * y < personality)
         {
             return true; // flee 
         }

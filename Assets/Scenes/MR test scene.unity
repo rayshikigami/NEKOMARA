@@ -2333,6 +2333,10 @@ MonoBehaviour:
   - {fileID: 8300000, guid: f4611e3ee883c8b4b85e1856bb4c6b64, type: 3}
   - {fileID: 8300000, guid: 53afb1d070ca0794297bf2149f446c24, type: 3}
   - {fileID: 8300000, guid: 214816feb90f2944a8fe87e49c8f8e23, type: 3}
+  - {fileID: 8300000, guid: 0f67d78c87f6434448399dec5d2e3ffd, type: 3}
+  - {fileID: 8300000, guid: 0b2feb98e8161ad469a7e309eddbd8af, type: 3}
+  - {fileID: 8300000, guid: b950e0cc083460742a8b27ccf805aba8, type: 3}
+  - {fileID: 8300000, guid: 912d359fcb5c626468618c346e1aab3a, type: 3}
   eatClips:
   - {fileID: 8300000, guid: 80f7a4ff04c9e814c9cee6a6916a8825, type: 3}
   punchClips:
@@ -10322,6 +10326,10 @@ MonoBehaviour:
   - {fileID: 8300000, guid: f4611e3ee883c8b4b85e1856bb4c6b64, type: 3}
   - {fileID: 8300000, guid: 53afb1d070ca0794297bf2149f446c24, type: 3}
   - {fileID: 8300000, guid: 214816feb90f2944a8fe87e49c8f8e23, type: 3}
+  - {fileID: 8300000, guid: 0f67d78c87f6434448399dec5d2e3ffd, type: 3}
+  - {fileID: 8300000, guid: 0b2feb98e8161ad469a7e309eddbd8af, type: 3}
+  - {fileID: 8300000, guid: b950e0cc083460742a8b27ccf805aba8, type: 3}
+  - {fileID: 8300000, guid: 912d359fcb5c626468618c346e1aab3a, type: 3}
   eatClips:
   - {fileID: 8300000, guid: 80f7a4ff04c9e814c9cee6a6916a8825, type: 3}
   punchClips:
@@ -15894,7 +15902,7 @@ MonoBehaviour:
   Colliders: 1
   CutHoles: 0
   castShadows: 1
-  hideMesh: 0
+  hideMesh: 1
   Layer: 0
   textureCoordinateModes:
   - WallU: 5
@@ -40602,6 +40610,10 @@ MonoBehaviour:
   - {fileID: 8300000, guid: f4611e3ee883c8b4b85e1856bb4c6b64, type: 3}
   - {fileID: 8300000, guid: 53afb1d070ca0794297bf2149f446c24, type: 3}
   - {fileID: 8300000, guid: 214816feb90f2944a8fe87e49c8f8e23, type: 3}
+  - {fileID: 8300000, guid: 0f67d78c87f6434448399dec5d2e3ffd, type: 3}
+  - {fileID: 8300000, guid: 0b2feb98e8161ad469a7e309eddbd8af, type: 3}
+  - {fileID: 8300000, guid: b950e0cc083460742a8b27ccf805aba8, type: 3}
+  - {fileID: 8300000, guid: 912d359fcb5c626468618c346e1aab3a, type: 3}
   eatClips:
   - {fileID: 8300000, guid: 80f7a4ff04c9e814c9cee6a6916a8825, type: 3}
   punchClips:
