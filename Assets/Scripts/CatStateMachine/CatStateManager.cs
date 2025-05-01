@@ -15,8 +15,18 @@ public abstract class CatStateBase
 
     public virtual void Enter() { }
     public virtual void Update() { }
-    public virtual void OnUpdate() { 
-        if(!cat.isFollowing && cat.othercat == null) 
+    public virtual void OnUpdate() {
+        if (cat.isPetting) {
+            this.Update();
+            return; }
+        if (cat.isPetable() )
+        {
+            Debug.Log("cat is petted.");
+            cat.isPetting = true;
+            cat.ChangeState(new CatPetState(cat)); // Transition to play with cat teaser state
+            return;
+        }
+        if (!cat.isFollowing && cat.othercat == null) 
         {
             if(!cat.sleeping && !cat.sitting ) // 如果貓咪沒有睡覺，並且貓咪沒有坐下
             {
@@ -56,7 +66,7 @@ public class CatIdleState : CatStateBase // 閒置狀態
     public CatIdleState(CatStateManager cat) : base(cat) { }
     private float idleDuration = 0f; 
 
-    private float[] stateProbabilities = { 1f, 0f, 0f, 0f, 1f, 1f}; // 機率 array
+    private float[] stateProbabilities = { 1f, 1f, 0f, 0f, 1f, 1f}; // 機率 array
 
     public override void Enter()
     {
@@ -347,7 +357,7 @@ public class CatEatState : CatStateBase // 吃東西狀態 -> completed
             cat.audioSource.Stop();
             if(foodType == 0)
             {
-                catBowlScript.isFull = false; // Set the food bowl to not full after eating
+                catBowlScript.Eaten(); // Set the food bowl to not full after eating
             }
             else
             {
@@ -562,6 +572,7 @@ public class CatFollowState : CatStateBase // 跟隨狀態 -> 等手勢偵測 !!
     
     public override void Update()
     {
+        Debug.Log("is Following");
         if(!cat.sitting){
             cat.FollowUser();
             // 
@@ -590,6 +601,7 @@ public class CatFollowState : CatStateBase // 跟隨狀態 -> 等手勢偵測 !!
         }
         CatTeaser catTeaser = Object.FindObjectOfType<CatTeaser>();
         //Debug.Log(cat.lefthand.gestureType);
+        
         if (catTeaser != null && catTeaser.teasing)
         {
             cat.sitting = false;
@@ -709,11 +721,14 @@ public class CatPetState : CatStateBase // 撫摸狀態 ->  !!!
 
     public override void Enter()
     {
+        cat.isFollowing = false;
+        cat.sitting = false;
+        cat.agent.ResetPath();
         cat.achieveSystem.UpdateProgress("touch", 1);
         cat.love.SetActive(true);
         cat.loveTime = Time.time;
-        cat.favorSystem.AddFavor(cat.catName, 5); // Decrease favor points when fleeing
-        cat.achieveSystem.UpdateProgress("favor_up",5);
+        cat.favorSystem.AddFavor(cat.catName, 7); // Decrease favor points when fleeing
+        cat.achieveSystem.UpdateProgress("favor_up",7);
         cat.animator.CrossFade("petted", 0.25f);
         cat.audioSource.PlayOneShot(cat.sleepClips[Random.Range(0, cat.sleepClips.Length)]);
     }
@@ -724,7 +739,17 @@ public class CatPetState : CatStateBase // 撫摸狀態 ->  !!!
         // For now, just wait for the duration to end
         if (cat.animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1.0f)
         {
-            cat.ChangeState(new CatFollowState(cat)); // Transition to idle state after petting
+            if (cat.isPetable())
+            {
+                cat.animator.Play("petted", 0 ,0.5f);
+                cat.favorSystem.AddFavor(cat.catName, 2); // Decrease favor points when fleeing
+                cat.achieveSystem.UpdateProgress("favor_up", 2);
+                cat.love.SetActive(true);
+                cat.loveTime = Time.time;
+                return;
+            }
+            cat.isPetting = false;
+            cat.ChangeState(new CatIdleState(cat)); // Transition to idle state after petting
             // stop audio
             cat.audioSource.Stop();
         }
@@ -1086,7 +1111,9 @@ public class CatStateManager : MonoBehaviour
     public bool sleeping = false; // Flag to check if the cat is sleeping
     public bool isFollowing = false; // Flag to check if the cat is following the user
     public bool isJumpable = false;
+    public bool isPetting = false;
     private bool isJumping = false;
+
     public Animator animator; // Reference to the Animator component
     public AudioSource audioSource; // Reference to the AudioSource component
     public AudioClip[] meowClips; // Array of meow sound clips
@@ -1114,6 +1141,8 @@ public class CatStateManager : MonoBehaviour
     public Hands righthand;
     public GameObject love;
     public float loveTime;
+    public float lastTimePet;
+    public float lastTimenotPet;
     public enum currentCatAnimation
     {
         idle,
@@ -1226,6 +1255,8 @@ public class CatStateManager : MonoBehaviour
             nextMeowTime = Time.time + Random.Range(20f, 30f); // Reset the timer after meowing
             hungerSystem.AddHunger(catName, -Random.Range(5, 10)); // Decrease hunger points when meowing
         }
+
+        
     }
 
     void LateUpdate()
@@ -1242,8 +1273,24 @@ public class CatStateManager : MonoBehaviour
         if (this.isFollowing){
             this.LookAtUser();
         }
+        if( Time.time - lastTimePet > 0.15f)
+        {
+            lastTimenotPet = Time.time;
+        }
     }
 
+    void OnCollisionEnter(Collision collision)
+    {
+
+        if (collision.gameObject.CompareTag("Hand"))
+        {
+            Debug.Log("cat and hand collisiotn");
+
+            lastTimePet = Time.time;
+        }
+        
+        
+    }
 
     public void ChangeState(CatStateBase newState)
     {
@@ -1271,6 +1318,11 @@ public class CatStateManager : MonoBehaviour
             agent.enabled = true; // Enable the NavMeshAgent when not jumping
             // agent.isStopped = false; // Resume the agent
         }
+    }
+
+    public bool isPetable()
+    {
+        return Time.time - lastTimenotPet > 1.1f && Time.time - lastTimePet < 0.3f;
     }
 
     public void MoveToRandomPoint() { 
@@ -1584,7 +1636,7 @@ public class CatStateManager : MonoBehaviour
 
         foreach (var ct in allCTs)
         {
-            if (ct.gameObject.scene.IsValid() && ct.gameObject.activeInHierarchy)
+            if (ct.gameObject.scene.IsValid() && ct.gameObject.activeInHierarchy && ct.isSet)
             {
                 activeCTs.Add(ct);
             }
