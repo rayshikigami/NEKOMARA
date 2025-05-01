@@ -1,0 +1,15 @@
+Font: Noto Sans TC  Style: Thin
+Point Size: 57   SP/PD Ratio: 8.8%
+
+Characters included: 67/69
+Missing characters: 2
+Excluded characters: 0
+
+Characters missing from font file:
+----------------------------------------
+ID: 13	Hex: D	Char []
+ID: 10	Hex: A	Char [
+]
+
+Characters excluded from packing:
+----------------------------------------
